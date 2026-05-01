@@ -54,7 +54,7 @@ MacGyvBot의 `macgyvbot-*` 레포지토리를 만들 때 사용하는 기본 템
 - OS: `Ubuntu 22.04`
 - ROS 2: `ROS2 Humble`
 - Python: `Python 3.10`
-- 카메라: `Intel® RealSense™ Depth Camera D???`
+- 카메라: `Intel® RealSense™ Depth Camera D435I`
 - 로봇팔: `Doosan-Robotics-M0609`
 - 그리퍼: `OnRobot RG2`
 
