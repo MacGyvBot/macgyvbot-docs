@@ -6,13 +6,6 @@ on:
       - opened
       - reopened
       - synchronize
-    paths:
-      - README.md
-      - PROJECT_PROPOSAL.md
-      - REQUIREMENT_SPECIFICATION.md
-      - MACGYVBOT-DECK/**
-      - assets/**
-      - .github/workflows/pr-preview.yml
 
 permissions:
   contents: read
