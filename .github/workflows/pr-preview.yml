@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  deployments: write
   issues: write
   pull-requests: write
 
@@ -135,3 +136,33 @@ jobs:
                 body,
               });
             }
+
+      - name: Mark PR artifact deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const artifactUrl = '${{ steps.upload-pdf.outputs.artifact-url }}';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { owner, repo } = context.repo;
+
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner,
+              repo,
+              ref: context.payload.pull_request.head.sha,
+              auto_merge: false,
+              required_contexts: [],
+              environment: 'pr-pdf-artifact',
+              description: 'MacGyvBot deck PDF artifact',
+              transient_environment: true,
+              production_environment: false,
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner,
+              repo,
+              deployment_id: deployment.id,
+              state: 'success',
+              environment_url: artifactUrl,
+              log_url: runUrl,
+              description: 'PDF artifact uploaded',
+            });
