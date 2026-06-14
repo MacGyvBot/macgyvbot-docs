@@ -54,6 +54,14 @@ http://localhost:8000
 - 마지막 슬라이드: `End`
 - 특정 슬라이드 이동: `#슬라이드번호` 사용, 예: `http://localhost:8000/#5`
 
+## GitHub Pages PR 확인
+
+GitHub Pages는 `main` 브랜치의 `/` 경로를 기준으로 정적 파일을 배포합니다. PR에서는 `Check GitHub Pages Preview` 워크플로가 실행되어 발표 자료에 필요한 정적 파일이 있는지 확인하고, 로컬 정적 서버로 주요 경로가 정상 응답하는지 검사합니다.
+
+이 체크는 PR 브랜치에서만 검증하며 preview 파일을 `main`에 커밋하지 않습니다. 변경 사항은 PR merge 후 기존 GitHub Pages URL에 반영됩니다.
+
+워크플로는 발표 데크를 PDF로 변환해 Actions artifact로도 업로드합니다. PR 댓글에 `macgyvbot-deck-pdf-pr-PR번호` artifact 다운로드 링크가 남으며, PR 체크 실행 결과의 `Artifacts` 영역에서도 내려받을 수 있습니다.
+
 ## 발표 자료 수정 가이드
 
 - 슬라이드 내용은 [MACGYVBOT-DECK/index.html](./MACGYVBOT-DECK/index.html)의 `<section class="slide">` 단위로 수정합니다.

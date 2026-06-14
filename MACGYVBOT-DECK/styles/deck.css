@@ -166,6 +166,11 @@ body { overflow: hidden; }
 .progressbar span { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .2s ease; }
 
 /* Print/export mode */
+@page {
+  size: 16in 9in;
+  margin: 0;
+}
+
 @media print {
   body { overflow: visible; background: white; }
   .deck { display: block; height: auto; background: white; }
