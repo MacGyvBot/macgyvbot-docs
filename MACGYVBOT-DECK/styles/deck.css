@@ -1,0 +1,183 @@
+@import url("./common.css?v=20260615-flow-fix-2");
+
+/* Deck viewport and slide frame */
+html, body { margin: 0; min-height: 100%; background: #111; color: var(--ink); font-family: var(--sans); }
+body { overflow: hidden; }
+.deck {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,.035) 1px, transparent 1px),
+    radial-gradient(circle at 10% 15%, rgba(255,216,100,.09), transparent 26%),
+    radial-gradient(circle at 90% 85%, rgba(111,232,255,.1), transparent 32%),
+    #101214;
+  background-size: 42px 42px, 42px 42px, auto, auto, auto;
+}
+.slide {
+  width: 1280px;
+  height: 720px;
+  aspect-ratio: 16 / 9;
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  overflow: hidden;
+  background: var(--bg);
+  padding: 56px 68px;
+  isolation: isolate;
+  transform: translate(-50%, -50%) scale(var(--deck-scale, 1));
+  transform-origin: center;
+}
+.slide.active { display: block; }
+.slide.cover {
+  background:
+    linear-gradient(90deg, rgba(255,216,100,.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,216,100,.06) 1px, transparent 1px),
+    radial-gradient(circle at 72% 46%, rgba(111,232,255,.11), transparent 20%),
+    linear-gradient(135deg, #07090a, #15191c 65%, #0d0f10);
+  background-size: 42px 42px, 42px 42px, auto, auto;
+  color: #fff;
+  padding: 76px 78px;
+}
+
+.slide.cover.bridge h1 {
+  max-width: 900px;
+  font-size: 80px;
+  line-height: 1.02;
+}
+
+.slide.cover.bridge > p {
+  margin-top: 22px;
+  max-width: 1080px;
+}
+
+.slide.divider {
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.055) 1px, transparent 1px),
+    radial-gradient(circle at 80% 50%, rgba(255,216,100,.13), transparent 22%),
+    linear-gradient(135deg, #080b0d, #151a1e 62%, #0b0e10);
+  background-size: 42px 42px, 42px 42px, auto, auto;
+  color: #fff;
+  padding: 74px 78px;
+  display: none;
+}
+
+.slide.divider.active { display: grid; }
+
+.divider-inner {
+  height: 100%;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  position: relative;
+}
+
+.divider-inner::before,
+.divider-inner::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan), transparent 74%);
+}
+
+.divider-inner::before { top: 0; }
+.divider-inner::after { bottom: 0; }
+
+.divider-code {
+  font-family: var(--mono);
+  color: var(--yellow);
+  font-size: 17px;
+  letter-spacing: .12em;
+}
+
+.divider-title {
+  font-family: Consolas, "SFMono-Regular", "Cascadia Code", "Menlo", monospace;
+  font-size: 104px;
+  line-height: .9;
+  letter-spacing: 0;
+}
+
+.divider-caption {
+  color: rgba(245,248,245,.68);
+  font-size: 24px;
+  max-width: 720px;
+}
+
+/* Shared deck chrome */
+.topbar {
+  position: absolute;
+  left: 68px;
+  right: 68px;
+  top: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 15px;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+.brand-mini { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 800; }
+.brand-mini img { width: 28px; height: 28px; border-radius: 8px; object-fit: cover; }
+.page-no { font-family: var(--mono); color: #8b929a; }
+
+/* Presentation controls */
+.nav {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(0,0,0,.46);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 9px 12px;
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+}
+.nav button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  cursor: pointer;
+}
+.nav button:hover { background: rgba(255,255,255,.2); }
+.progressbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255,255,255,.12);
+  z-index: 21;
+}
+.progressbar span { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .2s ease; }
+
+/* Print/export mode */
+@media print {
+  body { overflow: visible; background: white; }
+  .deck { display: block; height: auto; background: white; }
+  .slide {
+    display: block !important;
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100vw;
+    height: 56.25vw;
+    transform: none;
+    page-break-after: always;
+  }
+  .nav, .progressbar { display: none; }
+}
