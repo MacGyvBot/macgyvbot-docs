@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MacGyvBot Troubleshooting Deck</title>
+  <style>
+    :root {
+      --bg: #f6f7f5;
+      --ink: #15171a;
+      --muted: #6c727a;
+      --line: #d8ddd6;
+      --panel: #ffffff;
+      --dark: #090b0d;
+      --green: #a8f0b7;
+      --green-2: #39c56f;
+      --yellow: #ffd864;
+      --warn: #ff6b57;
+      --blue: #7aa7ff;
+      --shadow: 0 20px 60px rgba(16, 20, 24, .12);
+      --radius: 18px;
+      --mono: "SFMono-Regular", "Cascadia Code", "Menlo", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #111; color: var(--ink); font-family: var(--sans); }
+    body { overflow: hidden; }
+
+    .deck {
+      height: 100vh;
+      width: 100vw;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,216,100,.16), transparent 28%),
+        radial-gradient(circle at 90% 85%, rgba(57,197,111,.18), transparent 30%),
+        #101214;
+    }
+
+    .slide {
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      aspect-ratio: 16 / 9;
+      display: none;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+      padding: 56px 68px;
+      isolation: isolate;
+    }
+    .slide.active { display: block; }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: auto -7% -18% auto;
+      width: 42%;
+      height: 42%;
+      border: 26px solid rgba(9,11,13,.94);
+      border-radius: 45% 55% 42% 58%;
+      transform: rotate(-18deg);
+      z-index: -1;
+    }
+    .slide.clean::before,
+    .slide.cover::before,
+    .slide.dark::before { display: none; }
+
+    .topbar {
+      position: absolute;
+      left: 68px;
+      right: 68px;
+      top: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: 15px;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+    .brand-mini { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 800; }
+    .brand-mini img { width: 28px; height: 28px; border-radius: 8px; object-fit: cover; }
+    .page-no { font-family: var(--mono); color: #8b929a; }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      font-size: 78px;
+      line-height: .96;
+      letter-spacing: -0.035em;
+      max-width: 920px;
+    }
+    h2 {
+      font-size: 48px;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+      max-width: 980px;
+    }
+    h3 {
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+    }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--green-2);
+      font-weight: 850;
+      font-size: 17px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 18px;
+    }
+    .kicker::before {
+      content: "";
+      width: 38px;
+      height: 6px;
+      background: var(--yellow);
+      border-radius: 999px;
+    }
+    .lead {
+      color: #384048;
+      font-size: 25px;
+      line-height: 1.38;
+      max-width: 820px;
+      margin-top: 24px;
+      letter-spacing: -0.012em;
+    }
+    .small { color: var(--muted); font-size: 18px; line-height: 1.45; }
+    .caption { color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .mono { font-family: var(--mono); }
+    .accent { color: var(--green-2); }
+    .yellow { color: #c39400; }
+
+    .cover {
+      background:
+        radial-gradient(circle at 72% 46%, rgba(255,216,100,.16), transparent 18%),
+        linear-gradient(135deg, #07090a, #15191c 65%, #0d0f10);
+      color: #fff;
+      padding: 76px 78px;
+    }
+    .cover .logo {
+      position: absolute;
+      right: 78px;
+      top: 78px;
+      width: 214px;
+      height: 214px;
+      border-radius: 34px;
+      object-fit: cover;
+      box-shadow: 0 30px 90px rgba(0,0,0,.5);
+    }
+    .cover h1 { max-width: 780px; font-size: 94px; }
+    .cover .lead { color: rgba(255,255,255,.78); max-width: 700px; }
+    .cover .meta {
+      position: absolute;
+      left: 78px;
+      bottom: 66px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      max-width: 900px;
+    }
+    .pill {
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.84);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 15px;
+      backdrop-filter: blur(8px);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 44px;
+      align-items: center;
+      height: 100%;
+      padding-top: 26px;
+    }
+    .stack { display: grid; gap: 20px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .grid.two { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .grid.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(20,24,28,.06);
+    }
+    .card.dark {
+      background: #111417;
+      color: #fff;
+      border-color: #252b30;
+    }
+    .card.green {
+      background: #e9fff0;
+      border-color: #b9f3c8;
+    }
+    .card.warn {
+      background: #fff1ee;
+      border-color: #ffc6bd;
+    }
+    .card.accent {
+      background: #f3fff6;
+      border-color: #b9f3c8;
+    }
+    .card.result {
+      background: #fff8df;
+      border-color: #ffe28b;
+    }
+    .card h3 { margin-bottom: 10px; }
+    .card p, .card li { color: #4a535c; font-size: 18px; line-height: 1.42; }
+    .card.dark p, .card.dark li { color: rgba(255,255,255,.74); }
+
+    ul.clean-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 13px; }
+    ul.clean-list li {
+      position: relative;
+      padding-left: 24px;
+      color: #343c44;
+      font-size: 21px;
+      line-height: 1.38;
+    }
+    ul.clean-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .62em;
+      width: 9px;
+      height: 9px;
+      background: var(--green-2);
+      border-radius: 999px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 5), 1fr);
+      gap: 12px;
+      align-items: stretch;
+      margin-top: 28px;
+    }
+    .flow-step {
+      position: relative;
+      min-height: 126px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      display: grid;
+      align-content: start;
+      gap: 8px;
+    }
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -16px;
+      top: 45%;
+      color: #a0a8b0;
+      font-size: 24px;
+      z-index: 2;
+    }
+    .flow-step b { font-size: 18px; letter-spacing: -0.01em; }
+    .flow-step span { color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .flow-step.hot { background: #111417; color: #fff; border-color: #22282d; }
+    .flow-step.hot span { color: rgba(255,255,255,.68); }
+
+    .arc {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      height: 100%;
+      align-items: center;
+    }
+    .arc-label {
+      align-self: stretch;
+      background: #111417;
+      color: #fff;
+      border-radius: 22px;
+      padding: 28px 24px;
+      display: grid;
+      align-content: space-between;
+    }
+    .arc-label .num { color: var(--yellow); font-size: 52px; font-family: var(--mono); font-weight: 900; }
+    .arc-label .name { font-size: 24px; font-weight: 850; line-height: 1.12; letter-spacing: -0.02em; }
+    .arc-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .arc-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 16px;
+      min-height: 202px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 10px;
+    }
+    .arc-box .tag {
+      width: max-content;
+      border-radius: 999px;
+      padding: 6px 9px;
+      background: #edf2ee;
+      color: #53605a;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .arc-box h3 { font-size: 20px; }
+    .arc-box p { font-size: 15px; line-height: 1.36; color: #52606a; }
+    .arc-box.final { border-color: #91e0a8; background: #effff3; }
+    .arc-box.limit { border-color: #ffd0c6; background: #fff4f1; }
+
+    .placeholder {
+      border: 2px dashed #9aa4ad;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.75), rgba(255,255,255,.45)),
+        repeating-linear-gradient(45deg, rgba(21,23,26,.04) 0, rgba(21,23,26,.04) 8px, transparent 8px, transparent 16px);
+      border-radius: 22px;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      color: #44505a;
+    }
+    .placeholder b { display: block; font-size: 28px; margin-bottom: 10px; color: #222a30; }
+    .placeholder span { display: block; font-size: 18px; line-height: 1.35; max-width: 520px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 34px;
+    }
+    .metric {
+      background: #111417;
+      color: #fff;
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 148px;
+      display: grid;
+      align-content: space-between;
+    }
+    .metric .value { font-size: 40px; font-weight: 900; color: var(--yellow); font-family: var(--mono); }
+    .metric .label { color: rgba(255,255,255,.72); font-size: 16px; line-height: 1.3; }
+
+    .table {
+      display: grid;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+      margin-top: 24px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1.1fr 1.5fr 1.4fr;
+      min-height: 58px;
+      border-bottom: 1px solid var(--line);
+    }
+    .row:last-child { border-bottom: 0; }
+    .row > div { padding: 16px 18px; font-size: 18px; line-height: 1.3; }
+    .row.head { background: #111417; color: #fff; font-weight: 800; }
+    .row:not(.head) > div:nth-child(1) { font-weight: 800; }
+    .row:not(.head) > div { color: #404850; }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 34px;
+    }
+    .timebox {
+      min-height: 210px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+    }
+    .timebox .phase { font-family: var(--mono); color: var(--green-2); font-size: 18px; font-weight: 900; margin-bottom: 16px; }
+    .timebox h3 { margin-bottom: 10px; }
+    .timebox p { color: var(--muted); font-size: 17px; line-height: 1.38; }
+
+    .nav {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(0,0,0,.46);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 9px 12px;
+      backdrop-filter: blur(10px);
+      font-size: 13px;
+    }
+    .nav button {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      cursor: pointer;
+    }
+    .nav button:hover { background: rgba(255,255,255,.2); }
+    .progressbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background: rgba(255,255,255,.12);
+      z-index: 21;
+    }
+    .progressbar span { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .2s ease; }
+
+    @media print {
+      body { overflow: visible; background: white; }
+      .deck { display: block; height: auto; background: white; }
+      .slide { display: block !important; width: 100vw; height: 56.25vw; page-break-after: always; }
+      .nav, .progressbar { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" id="deck">
+    <section class="slide cover active">
+      <img class="logo" src="assets/macgyvbot.png" alt="MacGyvBot logo" />
+      <div class="kicker">Intelligent Robotics Track</div>
+      <h1>MacGyvBot</h1>
+      <p class="lead">음성/GUI 명령으로 공구를 전달하고 반납하는 ROS 2 기반 로봇팔 어시스턴트</p>
+      <div class="meta">
+        <span class="pill">Doosan M0609</span>
+        <span class="pill">OnRobot RG2</span>
+        <span class="pill">RealSense D435I</span>
+        <span class="pill">ROS 2 Humble</span>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="split">
+        <div>
+          <div class="kicker">Opening</div>
+          <h2>발표의 중심은 기능 나열이 아니라 시행착오입니다</h2>
+          <p class="lead">각 파트는 같은 구조로 설명합니다. 우리가 무엇을 고민했고, 처음 무엇을 가정했으며, 실제 로봇에서 어떤 한계를 보고 방향을 바꿨는지 보여줍니다.</p>
+        </div>
+        <div class="arc-grid" style="grid-template-columns: 1fr; gap: 12px;">
+          <div class="flow-step hot"><b>1. 문제</b><span>사용자/로봇 상황에서 실제로 어려운 점</span></div>
+          <div class="flow-step"><b>2. 초기 접근</b><span>처음 세운 단순한 가정과 구현</span></div>
+          <div class="flow-step"><b>3. 한계</b><span>현장 테스트에서 깨진 지점</span></div>
+          <div class="flow-step"><b>4. 방향 수정</b><span>다른 방식을 선택한 판단 근거</span></div>
+          <div class="flow-step"><b>5. 결과</b><span>현재 구조와 남은 리스크</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide cover">
+      <div class="kicker">Troubleshooting Deep Dive</div>
+      <h1>시행착오를 설계 근거로 보여주는 파트</h1>
+      <p>핵심 기술은 처음부터 정답이 아니라, 실제 로봇 시연에서 실패한 지점을 줄여가며 선택한 결과다.</p>
+      <div class="meta">
+        <span class="pill">Tool Pick</span>
+        <span class="pill">Handoff</span>
+        <span class="pill">Drawer Return</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Tool Pick Perception / Problem</div>
+      <h2>서랍 안의 공구를 어디를 잡아야 하는지가 첫 번째 문제였다</h2>
+      <div class="grid two">
+        <div class="card accent"><h3>시연 조건</h3><p>공구는 서랍 내부에 있고, 위치와 회전이 매번 달라진다. 로봇은 bbox 중심 하나만으로도 집을 수 있어야 했다.</p></div>
+        <div class="placeholder"><div><b>이미지 교체 영역</b><span>서랍 내부 RGB 화면 + YOLO bbox 예시</span></div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Tool Pick Perception / Early Approach</div>
+      <h2>초기에는 VLM/API 기반 grasp point 선택을 시도했다</h2>
+      <div class="grid two">
+        <div class="card"><h3>기대한 점</h3><p>bbox image crop을 넘기면 사람이 보듯이 손잡이, 긴 축, 잡기 좋은 지점을 고를 수 있을 것으로 봤다.</p></div>
+        <div class="card"><h3>실제 판단 근거</h3><p>공구 종류가 제한되어 있어도 위치와 회전이 변하면 응답 일관성이 낮았다. 실시간 제어에서는 지연도 부담이었다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Tool Pick Perception / Limitation</div>
+      <h2>VLM은 그럴듯한 설명은 잘했지만 로봇 좌표로 쓰기 어려웠다</h2>
+      <div class="table">
+        <div class="row head"><div>관찰</div><div>문제</div><div>설계 영향</div></div>
+        <div class="row"><div>응답 좌표 흔들림</div><div>같은 이미지에서도 grasp point가 달라짐</div><div>motion target으로 직접 사용하기 어려움</div></div>
+        <div class="row"><div>bbox 기준 의존</div><div>배경과 공구가 섞이면 판단 불안정</div><div>실제 공구 픽셀 영역이 필요</div></div>
+        <div class="row"><div>시간 지연</div><div>시연 flow가 느려짐</div><div>로컬 계산 기반으로 전환 필요</div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Tool Pick Perception / Final Direction</div>
+      <h2>SAM/Depth mask와 PCA로 공구의 실제 축을 계산하는 방식으로 바꿨다</h2>
+      <div class="flow" style="--cols: 4;">
+        <div class="flow-step"><b>YOLO</b><span>tool bbox 후보</span></div>
+        <div class="flow-step"><b>SAM</b><span>tool mask 추출</span></div>
+        <div class="flow-step"><b>Depth</b><span>같은 깊이 band 유지</span></div>
+        <div class="flow-step hot"><b>PCA</b><span>yaw / width 계산</span></div>
+      </div>
+      <div class="placeholder" style="margin-top: 30px; min-height: 210px;"><div><b>이미지 교체 영역</b><span>SAM mask, depth mask, PCA axis overlay</span></div></div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Tool Pick Perception / Result</div>
+      <h2>설명 가능한 좌표보다 재현 가능한 좌표를 우선했다</h2>
+      <div class="grid three">
+        <div class="card result"><h3>성과</h3><p>공구 mask 기반으로 yaw/width를 계산해 MoveIt target으로 넘길 수 있었다.</p></div>
+        <div class="card"><h3>남은 한계</h3><p>서랍 벽 근처, 깊은 안쪽, 반사/edge noise가 있는 경우 pick 안정성이 떨어진다.</p></div>
+        <div class="card"><h3>발표 메시지</h3><p>실시간 로봇 제어에는 deterministic한 perception이 더 맞았다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Handoff / Problem</div>
+      <h2>사용자가 공구를 실제로 잡았는지 안전하게 판단해야 했다</h2>
+      <div class="grid two">
+        <div class="card accent"><h3>왜 중요한가</h3><p>false positive는 로봇이 공구를 너무 일찍 놓는 문제다. handoff에서는 단순 성능 문제가 아니라 안전 문제다.</p></div>
+        <div class="placeholder"><div><b>이미지 교체 영역</b><span>사용자 손, 그리퍼, 공구가 겹치는 handoff 장면</span></div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Handoff / Early Approach</div>
+      <h2>초기에는 손과 공구가 가까우면 잡았다고 보는 rule-based score를 만들었다</h2>
+      <div class="flow" style="--cols: 4;">
+        <div class="flow-step"><b>YOLO bbox</b><span>공구 위치</span></div>
+        <div class="flow-step"><b>Hand landmark</b><span>손 위치</span></div>
+        <div class="flow-step"><b>ROI / depth</b><span>거리 조건</span></div>
+        <div class="flow-step hot"><b>Threshold</b><span>grasp 판단</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Handoff / Limitation</div>
+      <h2>가까움은 grasp가 아니었다</h2>
+      <div class="grid two">
+        <div class="card warn"><h3>bbox 누락</h3><p>그리퍼와 공구가 겹치면 YOLO bbox가 자주 사라졌다. bbox가 없으면 거리와 overlap 기준도 사라진다.</p></div>
+        <div class="card warn"><h3>오인식 위험</h3><p>손이 지나가거나 손바닥을 편 상태여도 score가 threshold를 넘을 수 있었다. release 판단에는 위험하다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Handoff / Final Direction</div>
+      <h2>질문을 가까운가에서 잡는 손이며 실제 공구 표면에 닿았는가로 바꿨다</h2>
+      <div class="flow" style="--cols: 4;">
+        <div class="flow-step"><b>21 landmarks</b><span>정규화 feature</span></div>
+        <div class="flow-step"><b>ML classifier</b><span>open / grasp</span></div>
+        <div class="flow-step"><b>Temporal gate</b><span>stable window</span></div>
+        <div class="flow-step hot"><b>SAM+Depth</b><span>tool contact</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Handoff / Result</div>
+      <h2>release 판단을 rule score 하나에 맡기지 않게 됐다</h2>
+      <div class="grid three">
+        <div class="card result"><h3>성과</h3><p>ML confidence, temporal stability, mask contact를 safety gate로 묶었다.</p></div>
+        <div class="card"><h3>남은 한계</h3><p>장갑, 조명, 카메라 각도, depth edge noise에는 아직 취약하다.</p></div>
+        <div class="card"><h3>발표 메시지</h3><p>handoff perception은 정확도보다 false release를 줄이는 방향으로 설계했다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Drawer Return / Problem</div>
+      <h2>반납은 서랍 안에 대충 놓기가 아니라 다음 pick을 위한 정리 문제였다</h2>
+      <div class="grid two">
+        <div class="card accent"><h3>시나리오 요구</h3><p>사용자가 “이거 정리해”라고 말하면 로봇은 공구를 다시 서랍 안 기준 위치로 가져가야 한다.</p></div>
+        <div class="placeholder"><div><b>이미지 교체 영역</b><span>서랍 위 ArUco marker와 반납 target 시각화</span></div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Drawer Return / Early Approach</div>
+      <h2>처음에는 서랍 좌표를 hardcoding하고 카메라 좌표를 바로 변환했다</h2>
+      <div class="grid two">
+        <div class="card"><h3>장점</h3><p>데모 환경이 고정되어 있을 때는 빠르게 동작을 만들 수 있었다.</p></div>
+        <div class="card"><h3>판단 근거</h3><p>초기 목표는 전체 drawer perception보다 end-to-end flow 완성이었기 때문에 고정 좌표가 빠른 출발점이었다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Drawer Return / Limitation</div>
+      <h2>하지만 서랍과 카메라가 조금만 바뀌어도 return target이 밀렸다</h2>
+      <div class="table">
+        <div class="row head"><div>관찰</div><div>원인</div><div>결과</div></div>
+        <div class="row"><div>xy는 비교적 맞음</div><div>평면 기준 위치는 잘 잡힘</div><div>반납 위치는 큰 틀에서 유지</div></div>
+        <div class="row"><div>z가 불안정</div><div>depth noise와 calibration 오차</div><div>충돌/공중 release 위험</div></div>
+        <div class="row"><div>서랍 pose 변화</div><div>hardcoded drawer frame</div><div>환경 이동에 취약</div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Drawer Return / Final Direction</div>
+      <h2>ArUco marker를 drawer 기준점으로 삼고 z는 안전 범위로 clamp했다</h2>
+      <div class="flow" style="--cols: 4;">
+        <div class="flow-step"><b>Detect marker</b><span>drawer reference</span></div>
+        <div class="flow-step"><b>Camera to robot</b><span>hand-eye transform</span></div>
+        <div class="flow-step"><b>Target xy</b><span>marker center 기준</span></div>
+        <div class="flow-step hot"><b>Clamp z</b><span>safe return height</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Drawer Return / Result</div>
+      <h2>문제를 서랍 전체 이해에서 안전한 기준점 반납으로 축소했다</h2>
+      <div class="grid three">
+        <div class="card result"><h3>성과</h3><p>marker center 기준 반납 위치를 안정화했고 z clamp로 위험한 target을 줄였다.</p></div>
+        <div class="card"><h3>남은 한계</h3><p>marker occlusion, drawer 열린 상태 collision, 깊은 안쪽 tool pose는 아직 어렵다.</p></div>
+        <div class="card"><h3>발표 메시지</h3><p>완전한 drawer understanding보다 데모 목표에 맞는 기준점 설계가 더 실용적이었다.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Problem Context</div>
+      <h2>작업자는 공구를 찾고, 이동하고, 반납하느라 작업 흐름이 끊긴다</h2>
+      <div class="grid-3" style="margin-top: 46px;">
+        <div class="card"><h3>작업 흐름 단절</h3><p>양손 작업 중 필요한 공구를 찾기 위해 본 작업을 멈춘다.</p></div>
+        <div class="card"><h3>안전 리스크</h3><p>작업 중 이동과 수령은 자세와 시야를 흐트러뜨린다.</p></div>
+        <div class="card"><h3>반복 탐색 비용</h3><p>공구가 제자리로 돌아오지 않으면 다음 작업자의 탐색 비용이 반복된다.</p></div>
+      </div>
+      <p class="lead">MacGyvBot의 목표는 공구 탐지 모델 하나가 아니라, 요청 → 탐지 → 집기 → 전달 → 반납까지 닫힌 공구 관리 루프를 만드는 것입니다.</p>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">System Flow</div>
+      <h2>전체 시스템은 명령을 robot task로 바꾸고, perception과 manipulation을 task coordinator가 묶는다</h2>
+      <div class="flow" style="--cols: 6;">
+        <div class="flow-step"><b>Command</b><span>음성/GUI 한국어 명령</span></div>
+        <div class="flow-step"><b>Task</b><span>bring/return queue</span></div>
+        <div class="flow-step"><b>Perception</b><span>YOLO, SAM, depth, hand</span></div>
+        <div class="flow-step"><b>Manipulation</b><span>MoveIt + RG2 + drawer</span></div>
+        <div class="flow-step"><b>Handoff</b><span>human grasp gate</span></div>
+        <div class="flow-step hot"><b>Return</b><span>drawer ownership close</span></div>
+      </div>
+      <div class="placeholder" style="margin-top: 34px; min-height: 210px;">
+        <div><b>이미지 교체 영역</b><span>전체 pipeline 구조 이미지 또는 ROS node/topic diagram</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Schedule & Roles</div>
+      <h2>팀의 구현은 command, perception, manipulation, task integration을 병렬로 쌓은 뒤 통합했다</h2>
+      <div class="timeline">
+        <div class="timebox"><div class="phase">Phase 1</div><h3>구조 설계</h3><p>ROS 2 package boundary, command/task pipeline, GUI 초안</p></div>
+        <div class="timebox"><div class="phase">Phase 2</div><h3>인식</h3><p>YOLO, SAM/depth, hand gesture, grasp pose 실험</p></div>
+        <div class="timebox"><div class="phase">Phase 3</div><h3>조작</h3><p>MoveIt, RG2, drawer open/close, hand-eye transform</p></div>
+        <div class="timebox"><div class="phase">Phase 4</div><h3>통합</h3><p>bring-return 시연, 실패 복구, 평가/발표자료 정리</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Team</div>
+      <h2>팀원 역할은 ROS 2 package boundary에 맞춰 나뉘었다</h2>
+      <div class="table">
+        <div class="row head"><div>담당</div><div>주요 기여</div><div>발표 연결</div></div>
+        <div class="row"><div>Command</div><div>STT/TTS/parser, LLM fallback, echo guard</div><div>자연어 명령을 task intent로 변환</div></div>
+        <div class="row"><div>Perception</div><div>YOLO/SAM/depth, hand grasp, grasp yaw/width</div><div>비전 시스템과 handoff 판단</div></div>
+        <div class="row"><div>Manipulation</div><div>MoveIt/RG2, drawer, hand-eye, collision scene</div><div>로봇 통합과 반납 흐름</div></div>
+        <div class="row"><div>Integration</div><div>Task coordinator, GUI/status, simulation/log</div><div>전체 pipeline과 robustness</div></div>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="arc">
+        <div class="arc-label"><div class="num">01</div><div><div class="name">Command</div><p class="caption">한국어 명령을 안정적인 robot task로 바꾸는 과정</p></div></div>
+        <div class="arc-grid">
+          <div class="arc-box"><span class="tag">문제</span><h3>자연어는 정해진 문법으로 들어오지 않는다</h3><p>사용자는 “드라이버 가져다줘”, “드라이버 좀”, “이거 정리해”처럼 다르게 말한다.</p></div>
+          <div class="arc-box"><span class="tag">초기 접근</span><h3>LLM prompt로 구조화 command 생성</h3><p>action, tool_name, target_mode로 정규화하면 task coordinator가 자연어를 몰라도 된다고 봤다.</p></div>
+          <div class="arc-box limit"><span class="tag">한계</span><h3>안전 명령까지 LLM에 맡기기 어렵다</h3><p>pause/resume/exit는 latency와 오해석이 곧 safety risk가 된다.</p></div>
+          <div class="arc-box final"><span class="tag">방향 수정</span><h3>fast parser와 LLM fallback 분리</h3><p>안전 명령은 local path, 일반 명령은 hard parser + LLM fallback으로 처리했다.</p></div>
+          <div class="arc-box"><span class="tag">결과</span><h3>자연어 입력이 안정적인 task intent로 닫힘</h3><p>deictic return은 current tool context를 함께 본다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="arc">
+        <div class="arc-label"><div class="num">02</div><div><div class="name">Tool Grasp Perception</div><p class="caption">탐지 bbox를 실제 grasp parameter로 바꾸는 과정</p></div></div>
+        <div class="arc-grid">
+          <div class="arc-box"><span class="tag">문제</span><h3>탐지는 곧 파지가 아니다</h3><p>YOLO bbox는 공구 위치를 주지만 잡을 점, yaw, RG2 width를 직접 주지 않는다.</p></div>
+          <div class="arc-box"><span class="tag">초기 접근</span><h3>bbox center를 pick target으로 사용</h3><p>빠르고 단순하지만 공구의 긴 축과 실제 표면을 설명하지 못했다.</p></div>
+          <div class="arc-box limit"><span class="tag">한계</span><h3>서랍 벽, depth noise, yaw 불안정</h3><p>벽 가까이 있거나 깊은 안쪽의 공구는 bbox center만으로는 잡기 어렵다.</p></div>
+          <div class="arc-box final"><span class="tag">방향 수정</span><h3>SAM/Depth mask + PCA</h3><p>mask pixels의 주축으로 yaw를 추정하고 depth/intrinsics로 width를 계산했다.</p></div>
+          <div class="arc-box"><span class="tag">결과</span><h3>perception output이 robot parameter가 됨</h3><p>MoveIt target, J6 yaw, RG2 width가 pipeline으로 연결된다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="arc">
+        <div class="arc-label"><div class="num">03</div><div><div class="name">Handoff Perception</div><p class="caption">사용자가 실제로 공구를 잡았는지 판단하는 과정</p></div></div>
+        <div class="arc-grid">
+          <div class="arc-box"><span class="tag">문제</span><h3>안전하게 전달하려면 무엇을 봐야 할까?</h3><p>release 순간의 false positive는 로봇이 공구를 너무 일찍 놓는 문제다.</p></div>
+          <div class="arc-box"><span class="tag">초기 접근</span><h3>YOLO bbox + hand landmark rule</h3><p>거리, ROI overlap, depth score가 threshold를 넘으면 grasp로 판단했다.</p></div>
+          <div class="arc-box limit"><span class="tag">한계</span><h3>bbox는 실제 공구가 아니고 proximity는 grasp가 아니다</h3><p>open palm이나 스쳐 지나가는 손도 score를 넘을 수 있었다.</p></div>
+          <div class="arc-box final"><span class="tag">방향 수정</span><h3>ML gesture + SAM/Depth contact</h3><p>손 모양과 실제 공구 표면 접촉을 분리해서 검증했다.</p></div>
+          <div class="arc-box"><span class="tag">결과</span><h3>release 판단이 safety gate로 바뀜</h3><p>rule score 단독 release를 제거하고 confidence/stability/contact를 함께 본다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="arc">
+        <div class="arc-label"><div class="num">04</div><div><div class="name">Drawer & Manipulation</div><p class="caption">공구 반납을 drawer ownership까지 닫는 과정</p></div></div>
+        <div class="arc-grid">
+          <div class="arc-box"><span class="tag">문제</span><h3>사용한 공구를 어떻게 다시 제자리로?</h3><p>가져다주는 것만으로는 공구 관리 루프가 닫히지 않는다.</p></div>
+          <div class="arc-box"><span class="tag">초기 접근</span><h3>서랍 내부를 vision으로 해석</h3><p>열린 drawer area와 내부 배치를 인식해 놓을 위치를 계산하려 했다.</p></div>
+          <div class="arc-box limit"><span class="tag">한계</span><h3>서랍 전체 인식은 과한 문제 설정</h3><p>반납에는 서랍 전체 이해보다 안정적인 기준점이 필요했다.</p></div>
+          <div class="arc-box final"><span class="tag">방향 수정</span><h3>ArUco center + hand-eye + z clamp</h3><p>returned tool bbox center를 marker center에 맞추는 문제로 축소했다.</p></div>
+          <div class="arc-box"><span class="tag">결과</span><h3>return flow가 drawer ownership까지 닫힘</h3><p>receive → relabel → marker resolve → place → close로 정리된다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide clean">
+      <div class="arc">
+        <div class="arc-label"><div class="num">05</div><div><div class="name">Safety & Robustness</div><p class="caption">실패를 감지하고 안전하게 회복하는 과정</p></div></div>
+        <div class="arc-grid">
+          <div class="arc-box"><span class="tag">문제</span><h3>실패가 발생해도 안전해야 한다</h3><p>drop, planning fail, handoff timeout, pause/resume은 서로 다른 recovery가 필요하다.</p></div>
+          <div class="arc-box"><span class="tag">초기 접근</span><h3>단계별 retry/stop</h3><p>각 perception/motion 단계에서 실패를 잡고 재시도하도록 처리했다.</p></div>
+          <div class="arc-box limit"><span class="tag">한계</span><h3>실패는 queue와 hardware state를 같이 흔든다</h3><p>drawer open 상태, collision scene, 실제 gripper/tool state가 어긋날 수 있다.</p></div>
+          <div class="arc-box final"><span class="tag">방향 수정</span><h3>TaskStep queue + runtime gate</h3><p>pause는 queue 보존, resume은 suspended step 재실행, drop은 recovery queue로 연결한다.</p></div>
+          <div class="arc-box"><span class="tag">결과</span><h3>failure → detection → response로 설명 가능</h3><p>실패를 숨기지 않고 status/log/GUI로 사용자에게 보여준다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Detailed Flow</div>
+      <h2>Command에서 Return까지 task coordinator가 상태를 묶는다</h2>
+      <div class="flow" style="--cols: 5;">
+        <div class="flow-step"><b>ToolCommand</b><span>action, tool, target_mode</span></div>
+        <div class="flow-step"><b>TaskStep queue</b><span>bring/return sequence</span></div>
+        <div class="flow-step"><b>Perception request</b><span>target, mask, depth, hand</span></div>
+        <div class="flow-step"><b>Manipulation action</b><span>MoveIt, RG2, drawer</span></div>
+        <div class="flow-step hot"><b>Status / Recovery</b><span>pause, retry, drop, exit</span></div>
+      </div>
+      <div class="placeholder" style="margin-top: 34px; min-height: 220px;">
+        <div><b>이미지 교체 영역</b><span>ROS 2 node/topic architecture 또는 task sequence diagram</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Vision Evaluation</div>
+      <h2>비전 시스템은 조건별 안정성을 분리해서 평가해야 한다</h2>
+      <div class="table">
+        <div class="row head"><div>조건</div><div>확인할 것</div><div>결과 입력</div></div>
+        <div class="row"><div>Normal</div><div>YOLO class별 detection, grasp pose</div><div>N / Trials</div></div>
+        <div class="row"><div>Shifted</div><div>공구 위치 변화, drawer 내부 위치 변화</div><div>N / Trials</div></div>
+        <div class="row"><div>Low light</div><div>SAM/depth mask와 hand gesture 안정성</div><div>N / Trials</div></div>
+        <div class="row"><div>Occlusion</div><div>bbox 누락, mask lock, handoff gate</div><div>N / Trials</div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Robot Integration</div>
+      <h2>로봇 통합은 좌표 변환, motion planning, gripper state를 함께 검증한다</h2>
+      <div class="grid-3" style="margin-top: 40px;">
+        <div class="card green"><h3>Hand-eye calibration</h3><p>camera frame의 pixel/depth target을 base frame pose로 변환한다.</p></div>
+        <div class="card green"><h3>MoveIt planning</h3><p>workspace clamp, drawer collision scene, IK 후보 선택으로 안전한 motion을 만든다.</p></div>
+        <div class="card green"><h3>RG2 gripper</h3><p>pregrasp depth, width 추정, hold monitor로 파지 상태와 낙하를 감시한다.</p></div>
+      </div>
+      <div class="placeholder" style="margin-top: 32px; min-height: 170px;">
+        <div><b>이미지 교체 영역</b><span>hand-eye 좌표 변환 그림 또는 RViz collision scene 캡처</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Isaac Sim</div>
+      <h2>실제 로봇 투입 전, simulation에서 sequence와 collision risk를 먼저 확인한다</h2>
+      <div class="split">
+        <ul class="clean-list">
+          <li>reachability: target pose feasibility</li>
+          <li>drawer/tool placement: marker pose와 collision scene</li>
+          <li>gripper approach: pregrasp height와 safe z</li>
+          <li>task sequence: bring-return order 검증</li>
+        </ul>
+        <div class="placeholder"><div><b>이미지 교체 영역</b><span>Isaac Sim screenshot 또는 USD/URDF scene 캡처</span></div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Results</div>
+      <h2>결과 요약 입력란</h2>
+      <div class="metrics">
+        <div class="metric"><div class="value">TBD</div><div class="label">YOLO class별 detection success</div></div>
+        <div class="metric"><div class="value">TBD</div><div class="label">grasp yaw/width success</div></div>
+        <div class="metric"><div class="value">TBD</div><div class="label">bring-return full loop success</div></div>
+        <div class="metric"><div class="value">TBD</div><div class="label">pause/drop/retry recovery</div></div>
+      </div>
+      <p class="lead">발표 전 실제 실험 횟수와 성공률을 입력하면 가이드의 결과 항목에 직접 대응됩니다.</p>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Demo Plan</div>
+      <h2>10분 시연은 평가 항목을 순서대로 증명한다</h2>
+      <div class="table">
+        <div class="row head"><div>시간</div><div>내용</div><div>평가 대응</div></div>
+        <div class="row"><div>0:00-0:40</div><div>ready 확인, GUI/status/log</div><div>발표/시연 안정성</div></div>
+        <div class="row"><div>0:40-3:20</div><div>“렌치 가져와” bring + detector/grasp yaw</div><div>태스크 완수, 비전</div></div>
+        <div class="row"><div>3:20-4:30</div><div>handoff ML/SAM/Depth gate</div><div>안전 전달</div></div>
+        <div class="row"><div>4:30-6:00</div><div>“이거 정리해” return</div><div>closed loop</div></div>
+        <div class="row"><div>6:00-8:00</div><div>pause/resume, drop/retry recovery</div><div>견고성</div></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Limitations</div>
+      <h2>한계는 기능별 문제가 아니라, 우리가 버린 가정의 남은 부분이다</h2>
+      <div class="table">
+        <div class="row head"><div>현재 한계</div><div>원인</div><div>다음 개선</div></div>
+        <div class="row"><div>handoff false release</div><div>proximity score가 수령 의도를 대변하지 못함</div><div>gesture + contact + stability gate 고도화</div></div>
+        <div class="row"><div>tool bbox missing</div><div>gripper/hand occlusion</div><div>SAM/Depth locked mask 개선</div></div>
+        <div class="row"><div>drawer return drift</div><div>drawer 전체 인식은 과한 문제 설정</div><div>ArUco center reference + marker cache</div></div>
+        <div class="row"><div>drawer close collision</div><div>open drawer를 obstacle로 인식</div><div>state-aware collision scene</div></div>
+      </div>
+    </section>
+
+    <section class="slide cover">
+      <img class="logo" src="assets/macgyvbot.png" alt="MacGyvBot logo" />
+      <div class="kicker">Closing</div>
+      <h1>MacGyvBot</h1>
+      <p class="lead">성과는 기능을 붙인 것이 아니라, 실제 로봇에서 깨진 가정을 하나씩 runtime gate와 closed loop로 바꾼 것입니다.</p>
+      <div class="meta">
+        <span class="pill">Command</span>
+        <span class="pill">Perception</span>
+        <span class="pill">Manipulation</span>
+        <span class="pill">Robustness</span>
+      </div>
+    </section>
+  </main>
+
+  <div class="nav" aria-label="slide navigation">
+    <button type="button" id="prev">Prev</button>
+    <span id="counter">1 / 1</span>
+    <button type="button" id="next">Next</button>
+  </div>
+  <div class="progressbar"><span id="progress"></span></div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    let index = Number(new URLSearchParams(location.search).get('slide') || location.hash.replace('#', '') || 1) - 1;
+    index = Math.max(0, Math.min(slides.length - 1, index));
+
+    slides.forEach((slide, i) => {
+      const page = slide.querySelector('.page-no');
+      if (page) page.textContent = `${String(i + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    });
+
+    function show(nextIndex, updateHash = true) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides[index].classList.add('active');
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      if (updateHash) history.replaceState(null, '', `#${index + 1}`);
+    }
+
+    document.getElementById('prev').addEventListener('click', () => show(index - 1));
+    document.getElementById('next').addEventListener('click', () => show(index + 1));
+    window.addEventListener('keydown', (event) => {
+      if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(event.key)) {
+        event.preventDefault();
+        show(index + 1);
+      }
+      if (['ArrowLeft', 'PageUp', 'Backspace'].includes(event.key)) {
+        event.preventDefault();
+        show(index - 1);
+      }
+      if (event.key === 'Home') show(0);
+      if (event.key === 'End') show(slides.length - 1);
+    });
+    window.addEventListener('hashchange', () => {
+      const next = Number(location.hash.replace('#', '') || 1) - 1;
+      if (Number.isFinite(next)) show(next, false);
+    });
+    show(index);
+  </script>
+</body>
+</html>
