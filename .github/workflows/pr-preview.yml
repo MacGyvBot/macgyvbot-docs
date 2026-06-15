@@ -60,21 +60,78 @@ jobs:
         with:
           chrome-version: stable
 
+      - name: Install PDF renderer
+        run: npm install --no-save puppeteer-core
+
       - name: Export deck PDF
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           mkdir -p artifacts
           python3 -m http.server 8000 --directory _site &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           sleep 2
-          "${{ steps.setup-chrome.outputs.chrome-path }}" \
-            --headless \
-            --disable-gpu \
-            --no-sandbox \
-            --print-to-pdf="$PWD/artifacts/macgyvbot-deck-pr-${{ github.event.pull_request.number }}.pdf" \
-            --print-to-pdf-no-header \
-            http://127.0.0.1:8000/MACGYVBOT-DECK/
-          test -s "artifacts/macgyvbot-deck-pr-${{ github.event.pull_request.number }}.pdf"
+          node <<'NODE'
+          const puppeteer = require('puppeteer-core');
+
+          (async () => {
+            const outputPath = `${process.cwd()}/artifacts/macgyvbot-deck-pr-${process.env.PR_NUMBER}.pdf`;
+            const browser = await puppeteer.launch({
+              executablePath: process.env.CHROME_PATH,
+              headless: 'new',
+              args: [
+                '--disable-gpu',
+                '--no-sandbox',
+                '--font-render-hinting=none',
+              ],
+            });
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
+            await page.goto('http://127.0.0.1:8000/MACGYVBOT-DECK/', {
+              waitUntil: ['load', 'networkidle0'],
+              timeout: 60000,
+            });
+            await page.evaluate(async () => {
+              await Promise.all(
+                Array.from(document.images)
+                  .filter((image) => !image.complete)
+                  .map((image) => new Promise((resolve, reject) => {
+                    image.addEventListener('load', resolve, { once: true });
+                    image.addEventListener('error', reject, { once: true });
+                  }))
+              );
+
+              if (document.fonts) {
+                const fontLoads = [400, 500, 600, 700, 800, 900].map((weight) =>
+                  document.fonts.load(`${weight} 24px Paperlogy`, 'MacGyvBot 한글 테스트')
+                );
+                await Promise.all(fontLoads);
+                await document.fonts.ready;
+
+                const ready = [400, 700, 800].every((weight) =>
+                  document.fonts.check(`${weight} 24px Paperlogy`, 'MacGyvBot 한글 테스트')
+                );
+                if (!ready) {
+                  throw new Error('Paperlogy webfont did not finish loading');
+                }
+              }
+            });
+            await page.emulateMediaType('print');
+            await page.pdf({
+              path: outputPath,
+              width: '1280px',
+              height: '720px',
+              printBackground: true,
+              preferCSSPageSize: true,
+              displayHeaderFooter: false,
+              margin: { top: 0, right: 0, bottom: 0, left: 0 },
+            });
+            await browser.close();
+          })();
+          NODE
+          test -s "artifacts/macgyvbot-deck-pr-${PR_NUMBER}.pdf"
 
       - name: Upload deck PDF artifact
         id: upload-pdf
