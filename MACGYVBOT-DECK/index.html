@@ -134,7 +134,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Command / Pipeline</div>
-      <h2>Command Pipeline은 자연어 입력을 로봇 Task 명령으로 정규화합니다</h2>
+      <h2>자연어 입력을 로봇 Task 명령으로 정규화하는 Command Pipeline</h2>
       <div class="decision-panel">
         <div class="proof-panel">
           <span class="id">INTERFACE ENTRY</span>
@@ -154,7 +154,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Command / Prompt Engineering</div>
-      <h2>LLM은 자유 응답 생성기가 아니라 command schema를 채우는 parser로 사용했습니다</h2>
+      <h2>Command Schema와 Context로 제어되는 LLM Parser</h2>
       <div class="proof-rig">
         <div class="table">
           <div class="row head"><div>사용자 표현</div><div>정규화 결과</div><div>처리 의도</div></div>
@@ -174,9 +174,9 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Operator GUI</div>
-      <h2>GUI는 로봇 상태를 보고 개입하는 operator control surface입니다</h2>
+      <h2>로봇 상태 확인과 수동 제어를 통합한 Operator GUI</h2>
       <div class="proof-rig">
-        <div class="placeholder"><div><b>이미지 교체 영역</b><span>최종 PyQt GUI 스크린샷: status, detector, chat, gripper, task log</span></div></div>
+        <div class="placeholder image-fill"><img src="assets/operator-gui-command-interface.png" alt="MacGyvBot operator GUI screenshot" /></div>
         <div class="signal-stack">
           <div class="signal-row"><span class="id">STATUS</span><b>Robot Status</b><span>로봇/카메라/Detector/task 상태를 한 화면에서 확인</span><span class="state">UI</span></div>
           <div class="signal-row"><span class="id">CHAT</span><b>Chat / TTS</b><span>사용자에게 필요한 안내만 chat으로 표시하고 TTS는 chat 메시지만 발화</span><span class="state">UX</span></div>
@@ -184,7 +184,6 @@
           <div class="signal-row"><span class="id">GRIP</span><b>Gripper Control</b><span>안전 상태에서만 slider와 숫자 입력으로 RG2 gripper 폭 제어</span><span class="state">SAFE</span></div>
         </div>
       </div>
-      <div class="source-note">발표 포인트: GUI는 예쁜 화면이 아니라, active task 중 chat input을 잠그고 pause/resume/cancel/home 같은 안전한 operator action만 노출하는 인터페이스입니다.</div>
     </section>
 
     <section class="slide">
