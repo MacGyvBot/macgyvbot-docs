@@ -155,7 +155,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Command / Prompt Engineering</div>
       <h2>Schema와 Context 기반 LLM Parser</h2>
-      <div class="proof-rig">
+      <div class="proof-rig prompt-rig">
         <div class="table">
           <div class="row head"><div>사용자 표현</div><div>정규화 결과</div><div>처리 의도</div></div>
           <div class="row"><div>드라이버 가져다줘</div><div><span class="mono">bring / screwdriver</span></div><div>공구 요청</div></div>
@@ -164,9 +164,10 @@
           <div class="row"><div>멈춰</div><div><span class="mono">pause / unknown</span></div><div>fast control</div></div>
         </div>
         <div class="signal-stack">
-          <div class="callout-line"><span class="label">SCHEMA</span><p>응답을 action, tool_name, target_mode, confidence 중심으로 제한해 task layer가 바로 사용할 수 있게 했습니다.</p></div>
-          <div class="callout-line"><span class="label">CONTEXT</span><p>지원 공구, 별칭, 기능 기반 표현, 제어 명령의 의미를 prompt context로 제공합니다.</p></div>
-          <div class="callout-line"><span class="label">GUARD</span><p>LLM 실패나 hallucination에 대비해 rule fallback을 두고, 지원하지 않는 drill 혼선을 제거했습니다.</p></div>
+          <div class="signal-row"><span class="id">SCHEMA</span><b>응답 형식 제한</b><span>action, tool_name, target_mode, confidence</span><span class="state">JSON</span></div>
+          <div class="signal-row"><span class="id">CONTEXT</span><b>명령 의미 주입</b><span>bring, return, pause, resume, cancel, home</span><span class="state">LLM</span></div>
+          <div class="signal-row"><span class="id">VOCAB</span><b>공구 별칭 정규화</b><span>렌치, 스패너, 몽키렌치 → wrench</span><span class="state">TOOL</span></div>
+          <div class="signal-row"><span class="id">GUARD</span><b>fallback과 혼선 방지</b><span>rule parser 보조, unsupported drill 제거</span><span class="state">SAFE</span></div>
         </div>
       </div>
     </section>

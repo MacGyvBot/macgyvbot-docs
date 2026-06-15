@@ -260,6 +260,21 @@ ul.clean-list li::before {
   align-items: stretch;
 }
 
+.proof-rig.prompt-rig .table {
+  margin-top: 0;
+  height: 100%;
+}
+
+.proof-rig.prompt-rig .signal-stack {
+  height: 100%;
+  align-content: stretch;
+}
+
+.proof-rig.prompt-rig .signal-row {
+  grid-template-columns: 72px .9fr 1.35fr 58px;
+  min-height: 82px;
+}
+
 .system-map,
 .proof-panel,
 .results-board,
