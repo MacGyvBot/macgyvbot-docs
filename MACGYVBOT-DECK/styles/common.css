@@ -275,6 +275,16 @@ ul.clean-list li::before {
   min-height: 82px;
 }
 
+.proof-rig.operator-gui-rig .operator-gui-stack {
+  height: 100%;
+  align-content: stretch;
+}
+
+.proof-rig.operator-gui-rig .signal-row {
+  grid-template-columns: 76px 1fr 1.28fr 54px;
+  min-height: 76px;
+}
+
 .system-map,
 .proof-panel,
 .results-board,
