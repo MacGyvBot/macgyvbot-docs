@@ -18,7 +18,7 @@
   --cyan: #6fe8ff;
   --yellow: #ffd864;
   --shadow: 0 20px 60px rgba(16, 20, 24, .12);
-  --radius: 10px;
+  --radius: 12px;
   --mono: Consolas, "SFMono-Regular", "Cascadia Code", "Menlo", monospace;
   --sans: Paperlogy, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
 }
@@ -105,7 +105,7 @@ h3 {
   top: 78px;
   width: 214px;
   height: 214px;
-  border-radius: 34px;
+  border-radius: var(6);
   object-fit: cover;
   box-shadow: 0 30px 90px rgba(0,0,0,.5);
 }
@@ -125,7 +125,7 @@ h3 {
   background: rgba(255,255,255,.06);
   color: rgba(255,255,255,.84);
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   font-size: 15px;
   backdrop-filter: blur(8px);
   font-family: var(--mono);
@@ -189,6 +189,248 @@ h3 {
 }
 .card.dark p, .card.dark li { color: rgba(255,255,255,.74); }
 
+.persona-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.persona-card .proof-metric {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.persona-card .proof-metric strong {
+  display: block;
+  font-size: 31px;
+  line-height: 1.1;
+  min-height: 38px;
+}
+
+.persona-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.persona-step,
+.problem-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(20,24,28,.06);
+}
+
+.persona-step {
+  min-height: 118px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.persona-step .id,
+.problem-card .id {
+  font-family: var(--mono);
+  color: var(--green-2);
+  font-size: 12px;
+  letter-spacing: .1em;
+}
+
+.persona-step b,
+.problem-card b {
+  font-size: 23px;
+  line-height: 1.18;
+  word-break: keep-all;
+}
+
+.persona-step p,
+.problem-card p {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.46;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.problem-card {
+  min-height: 250px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: 13px;
+}
+
+.problem-card.hot {
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.055) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.045) 1px, transparent 1px),
+    #11161a;
+  background-size: 28px 28px;
+  color: #fff;
+  border-color: #232a2f;
+}
+
+.problem-card.hot p {
+  color: rgba(245,248,245,.72);
+}
+
+.team-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.team-role-card {
+  min-height: 158px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  gap: 12px;
+  box-shadow: 0 14px 34px rgba(20,24,28,.06);
+}
+
+.team-role-card .id {
+  font-family: var(--mono);
+  color: var(--green-2);
+  font-size: 12px;
+  letter-spacing: .1em;
+}
+
+.team-role-card b {
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.team-role-card p {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.42;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.team-role-card.hot {
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.055) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.045) 1px, transparent 1px),
+    #11161a;
+  background-size: 28px 28px;
+  color: #fff;
+  border-color: #232a2f;
+}
+
+.team-role-card.hot p {
+  color: rgba(245,248,245,.72);
+}
+
+.dual-flow-board {
+  display: grid;
+  gap: 18px;
+}
+
+.flow-lane {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.lane-label {
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.055) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.045) 1px, transparent 1px),
+    #11161a;
+  background-size: 28px 28px;
+  border: 1px solid #232a2f;
+  border-radius: var(--radius);
+  color: #fff;
+  padding: 20px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.lane-label span {
+  font-family: var(--mono);
+  color: var(--cyan);
+  font-size: 13px;
+  letter-spacing: .12em;
+}
+
+.lane-label b {
+  font-size: 25px;
+  line-height: 1.18;
+  word-break: keep-all;
+}
+
+.lane-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lane-step {
+  position: relative;
+  min-height: 144px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.lane-step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  width: 12px;
+  text-align: center;
+  transform: translateY(-50%);
+  color: #8d979f;
+  font-size: 20px;
+  line-height: 1;
+  z-index: 2;
+}
+
+.lane-step.hot {
+  background: #111417;
+  color: #fff;
+  border-color: #22282d;
+}
+
+.lane-step b {
+  font-size: 19px;
+  line-height: 1.22;
+  word-break: keep-all;
+}
+
+.lane-step span {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.42;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.lane-step.hot span {
+  color: rgba(255,255,255,.68);
+}
+
 ul.clean-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 13px; }
 ul.clean-list li {
   position: relative;
@@ -207,7 +449,7 @@ ul.clean-list li::before {
   width: 9px;
   height: 9px;
   background: var(--green-2);
-  border-radius: 999px;
+  border-radius: var(--radius);
 }
 
 .flow {
@@ -222,7 +464,7 @@ ul.clean-list li::before {
   min-height: 126px;
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 20px;
   display: grid;
   align-content: start;
@@ -271,7 +513,7 @@ ul.clean-list li::before {
     #11161a;
   background-size: 28px 28px;
   color: #f5f8f5;
-  border-radius: 12px;
+  border-radius: var(--radius);
   box-shadow: 0 22px 50px rgba(10, 13, 16, .18);
 }
 
@@ -290,7 +532,8 @@ ul.clean-list li::before {
 }
 
 .system-map.compact .system-node {
-  min-height: 104px;
+  height: 124px;
+  min-height: 124px;
   padding: 14px;
 }
 
@@ -301,7 +544,7 @@ ul.clean-list li::before {
   min-height: 118px;
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.055);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 18px;
   display: grid;
   align-content: start;
@@ -462,7 +705,7 @@ ul.clean-list li::before {
   align-items: center;
   border: 1px solid rgba(255,255,255,.11);
   background: rgba(255,255,255,.05);
-  border-radius: 7px;
+  border-radius: var(--radius);
   padding: 14px;
 }
 
@@ -528,7 +771,7 @@ ul.clean-list li::before {
 
 .bar-track {
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: rgba(255,255,255,.1);
   overflow: hidden;
 }
@@ -595,7 +838,7 @@ ul.clean-list li::before {
   align-self: stretch;
   background: #111417;
   color: #fff;
-  border-radius: 22px;
+  border-radius: var(--radius);
   padding: 28px 24px;
   display: grid;
   align-content: space-between;
@@ -610,7 +853,7 @@ ul.clean-list li::before {
 .arc-box {
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius);
   padding: 18px;
   min-height: 202px;
   display: grid;
@@ -619,7 +862,7 @@ ul.clean-list li::before {
 }
 .arc-box .tag {
   width: max-content;
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 6px 9px;
   background: #edf2ee;
   color: #53605a;
@@ -638,7 +881,7 @@ ul.clean-list li::before {
     linear-gradient(0deg, rgba(111,232,255,.06) 1px, transparent 1px),
     linear-gradient(135deg, rgba(18,22,26,.94), rgba(28,34,38,.92));
   background-size: 24px 24px, 24px 24px, auto;
-  border-radius: 12px;
+  border-radius: var(--radius);
   min-height: 360px;
   display: grid;
   place-items: center;
@@ -661,7 +904,7 @@ ul.clean-list li::before {
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: #fff;
   box-shadow: 0 18px 40px rgba(10, 13, 16, .1);
 }
@@ -711,7 +954,7 @@ ul.clean-list li::before {
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: #fff;
   box-shadow: 0 18px 40px rgba(10, 13, 16, .1);
 }
@@ -794,7 +1037,7 @@ ul.clean-list li::before {
   margin: 28px 0 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: #fff;
   box-shadow: 0 18px 40px rgba(10, 13, 16, .1);
 }
@@ -895,7 +1138,7 @@ ul.clean-list li::before {
 .metric {
   background: #111417;
   color: #fff;
-  border-radius: 20px;
+  border-radius: var(--radius);
   padding: 24px;
   min-height: 148px;
   display: grid;
@@ -907,7 +1150,7 @@ ul.clean-list li::before {
 .table {
   display: grid;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: #fff;
   margin-top: 24px;
@@ -955,13 +1198,13 @@ ul.clean-list li::before {
   min-height: 210px;
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius);
   padding: 24px;
 }
 .milestone-rail .timebox {
   position: relative;
   min-height: 236px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 58px 16px 18px;
   box-shadow: none;
 }
@@ -973,7 +1216,7 @@ ul.clean-list li::before {
   width: 18px;
   height: 18px;
   border: 3px solid #fff;
-  border-radius: 50%;
+  border-radius: var(--radius);
   background: var(--green-2);
   box-shadow: 0 0 0 1px #111417;
   z-index: 1;
