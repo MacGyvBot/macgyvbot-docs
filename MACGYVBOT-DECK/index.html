@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MacGyvBot Troubleshooting Deck</title>
-  <link rel="stylesheet" href="styles/deck.css?v=20260615-handoff-arc" />
+  <link rel="stylesheet" href="styles/deck.css?v=20260615-bring-return-flow" />
 </head>
 <body>
   <main class="deck" id="deck">
@@ -12,7 +12,7 @@
       <img class="logo" src="assets/macgyvbot.png" alt="MacGyvBot logo" />
       <div class="kicker">Intelligent Robotics Track</div>
       <h1>MacGyvBot</h1>
-      <p class="lead">사용자의 공구 요청과 반납을 처리하는 ROS 2 기반 로봇팔 어시스턴트</p>
+      <p class="lead">사용자의 공구 요청과 반납을 처리하는 어시스턴트</p>
       <div class="meta">
         <span class="pill">Doosan M0609</span>
         <span class="pill">OnRobot RG2</span>
@@ -26,14 +26,14 @@
       <div class="split">
         <div>
           <div class="kicker">Presentation Flow</div>
-          <h2>무엇을 만들었는가를 먼저 보이고, 그 다음 구현과 검증으로 내려갑니다</h2>
-          <p class="lead">발표는 사용자 시나리오 두 개로 시작합니다. 이후 Command, Task Coordination, Perception, Manipulation, Safety를 구현 관점에서 설명하고, Isaac Sim 검증, 프로젝트 임팩트, 개선 방향으로 마무리합니다.</p>
+          <h2>문제 정의에서 시스템 설계, 구현 파트, 검증과 임팩트로 내려갑니다</h2>
+          <p class="lead">발표는 사용자의 공구 요청과 반납 문제로 시작합니다. 이후 System Design, Command, Task Coordination, Perception, Manipulation, Safety를 구현 관점에서 설명하고, Simulation과 Impact로 마무리합니다.</p>
         </div>
         <div class="arc-grid intro-stack" style="grid-template-columns: 1fr; gap: 10px;">
-          <div class="flow-step hot"><b>1. What</b><span>공구 요청과 반납을 처리하는 closed loop</span></div>
-          <div class="flow-step"><b>2. How</b><span>Command, Task Queue, Perception, Manipulation</span></div>
-          <div class="flow-step"><b>3. Safety</b><span>collision scene, drop detection, recovery</span></div>
-          <div class="flow-step"><b>4. Simulation</b><span>Isaac Sim으로 실제 로봇 투입 전 검증</span></div>
+          <div class="flow-step hot"><b>1. Problem</b><span>공구 요청과 반납을 닫아야 하는 사용자 작업 루프</span></div>
+          <div class="flow-step"><b>2. System Design</b><span>ROS 2 package boundary와 task 중심 architecture</span></div>
+          <div class="flow-step"><b>3. Implementation</b><span>Command, Task Coordination, Perception, Manipulation</span></div>
+          <div class="flow-step"><b>4. Safety / Simulation</b><span>collision scene, recovery, Isaac Sim 검증</span></div>
           <div class="flow-step"><b>5. Impact</b><span>작업 효율, 안전성, 자동화 가능성, 개선 방향</span></div>
         </div>
       </div>
@@ -42,60 +42,87 @@
     <section class="slide divider">
       <div class="divider-inner">
         <div class="divider-code">SECTION 01</div>
-        <h1 class="divider-title">WHAT</h1>
-        <p class="divider-caption">MacGyvBot이 닫는 두 개의 사용자 작업 루프</p>
+        <h1 class="divider-title">PROBLEM</h1>
+        <p class="divider-caption">사용자의 공구 요청과 반납을 처리하는 어시스턴트</p>
       </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
-      <div class="kicker">What We Built</div>
-      <h2>MacGyvBot은 공구를 찾아 전달하고, 사용 후 다시 보관하는 로봇 시스템입니다</h2>
-      <div class="proof-rig">
-        <div class="system-map" style="--cols: 2;">
-          <div class="system-node"><span class="id">REQUEST</span><b>공구 요청</b><span>사용자가 필요한 공구를 말하면 로봇이 서랍에서 꺼내 사용자에게 전달한다.</span></div>
-          <div class="system-node"><span class="id">RETURN</span><b>공구 반납</b><span>사용한 공구를 다시 받아 해당 서랍으로 이동하고 보관한다.</span></div>
+      <div class="kicker">Problem / Persona</div>
+      <h2>작업 페르소나: Hands-Busy Operator</h2>
+      <div class="slide-body">
+      <div class="persona-layout">
+        <div class="proof-panel persona-card">
+          <span class="id">PRIMARY USER</span>
+          <h3>작업 위치를 떠나기 어려운 현장 작업자</h3>
+          <p>작업자는 장비나 조립물을 잡고 있어 공구 보관 장소까지 직접 이동하기 어렵습니다. MacGyvBot은 고정형 팔이 아니라 이동 가능한 로봇이라는 가정에서, 서랍 보관 장소와 작업자 위치 사이를 연결합니다.</p>
+          <div class="proof-metric"><strong>mobile assist</strong><span>보관 장소의 공구를 작업 위치까지 운반</span></div>
         </div>
-        <div class="proof-panel">
-          <span class="id">CORE MESSAGE</span>
-          <h3>단순 공구 탐지가 아니라 공구 관리 closed loop</h3>
-          <p>공구명 파악, 서랍 탐색, pick, 사용자 위치 탐색, handoff, return, drawer storage를 하나의 robot task로 묶었습니다.</p>
-          <div class="proof-metric"><strong>2</strong><span>request loop + return loop</span></div>
+        <div class="persona-stack">
+          <div class="persona-step"><span class="id">CONTEXT</span><b>보관 장소와 작업 위치 분리</b><p>공구 서랍은 정리된 보관 장소에 있고, 작업자는 다른 위치에서 장비를 다룹니다.</p></div>
+          <div class="persona-step"><span class="id">MOMENT</span><b>작업 중 공구 교체</b><p>렌치, 드라이버처럼 필요한 공구가 바뀔 때 작업자는 위치를 이탈하지 않고 요청합니다.</p></div>
+          <div class="persona-step"><span class="id">EXPECTATION</span><b>가져오고, 전달하고, 다시 보관</b><p>로봇은 서랍에서 공구를 꺼내 작업자에게 이동하고, 사용 후 다시 보관 장소로 돌려놓습니다.</p></div>
         </div>
       </div>
-    </section>
-
-    <section class="slide">
-      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
-      <div class="kicker">Scenario / Tool Request</div>
-      <h2>사용자의 공구 요청은 공구명에서 사용자 위치 handoff까지 이어집니다</h2>
-      <div class="flow" style="--cols: 5;">
-        <div class="flow-step"><b>공구명 파악</b><span>LLM/parser로 tool intent 추출</span></div>
-        <div class="flow-step"><b>서랍 파악</b><span>tool-drawer mapping 확인</span></div>
-        <div class="flow-step"><b>공구 꺼내기</b><span>drawer open, YOLO, grasp</span></div>
-        <div class="flow-step"><b>사용자 탐색</b><span>handoff target, hand state</span></div>
-        <div class="flow-step hot"><b>건네주기</b><span>release gate 통과 후 전달</span></div>
       </div>
-      <div class="source-note">발표 포인트: 요청 흐름은 사용자의 말이 실제 handoff까지 이어지는 end-to-end 시나리오입니다.</div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
-      <div class="kicker">Scenario / Tool Return</div>
-      <h2>사용자의 공구 반납은 다시 공구를 식별하고 서랍 보관까지 닫습니다</h2>
-      <div class="flow" style="--cols: 4;">
-        <div class="flow-step"><b>공구 전달받기</b><span>human grasp result와 gripper handoff</span></div>
-        <div class="flow-step"><b>공구 파악</b><span>현재 tool context 또는 재탐지</span></div>
-        <div class="flow-step"><b>서랍 열기</b><span>drawer ownership, handle motion</span></div>
-        <div class="flow-step hot"><b>서랍에 보관</b><span>place, release, close</span></div>
+      <div class="kicker">Problem / Why Robot</div>
+      <h2>문제 정의: Tool Flow Interruption</h2>
+      <div class="slide-body">
+      <div class="problem-grid">
+        <div class="problem-card"><span class="id">01</span><b>이동 비용</b><p>작업자가 보관 장소까지 직접 이동하면 작업 흐름이 끊깁니다.</p></div>
+        <div class="problem-card"><span class="id">02</span><b>공구 탐색</b><p>서랍을 열고 필요한 공구를 찾는 과정이 본 작업과 분리된 반복 업무가 됩니다.</p></div>
+        <div class="problem-card"><span class="id">03</span><b>반납 누락</b><p>사용 후 제자리에 돌아가지 않은 공구는 다음 작업과 재고 관리 문제로 이어집니다.</p></div>
+        <div class="problem-card hot"><span class="id">GOAL</span><b>MacGyvBot's GOAL</b><p>이동 로봇이 보관 서랍에서 공구를 꺼내 작업자에게 가져다주고, 사용 후 다시 보관합니다.</p></div>
       </div>
-      <div class="source-note">발표 포인트: 반납 흐름은 로봇이 공구를 다시 책임지고 보관하는 ownership 전환입니다.</div>
+      </div>
+    </section>
+
+    <section class="slide divider">
+      <div class="divider-inner">
+        <div class="divider-code">SECTION 02</div>
+        <h1 class="divider-title">SYSTEM DESIGN</h1>
+        <p class="divider-caption">Command를 robot task로 바꾸고 실행 순서를 소유하는 구조</p>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
-      <div class="kicker">System Architecture</div>
-      <h2>전체 시스템은 command를 robot task로 바꾸고, task coordinator가 실행 순서를 소유합니다</h2>
+      <div class="kicker">System Design / Task Flow</div>
+      <h2>전체 작업 흐름도</h2>
+      <div class="slide-body">
+      <div class="dual-flow-board">
+        <div class="flow-lane">
+          <div class="lane-label"><span>BRING</span><b>보관 장소 → 작업자</b></div>
+          <div class="lane-steps">
+            <div class="lane-step"><b>요청 이해</b><span>공구명과 작업 intent 파악</span></div>
+            <div class="lane-step"><b>서랍 접근</b><span>해당 공구 보관 위치로 이동</span></div>
+            <div class="lane-step"><b>공구 꺼내기</b><span>detect, mask, grasp 후 pick</span></div>
+            <div class="lane-step hot"><b>작업자 전달</b><span>작업 위치로 이동해 handoff</span></div>
+          </div>
+        </div>
+        <div class="flow-lane">
+          <div class="lane-label"><span>RETURN</span><b>작업자 → <br>보관 장소</b></div>
+          <div class="lane-steps">
+            <div class="lane-step"><b>공구 회수</b><span>작업자 handoff로 공구 전달받기</span></div>
+            <div class="lane-step"><b>공구 확인</b><span>현재 tool context 또는 재탐지</span></div>
+            <div class="lane-step"><b>서랍 복귀</b><span>공구 보관 위치로 이동</span></div>
+            <div class="lane-step hot"><b>서랍 보관</b><span>open, place, release, close</span></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">System Design / Architecture</div>
+      <h2>Command-to-Task 기반 ROS 2 계층형 아키텍처</h2>
+      <div class="slide-body">
       <div class="system-map compact" style="--cols: 5; margin-top: 24px;">
         <div class="system-node"><span class="id">CMD</span><b>Command</b><span>LLM/parser, STT/TTS, GUI command</span></div>
         <div class="system-node"><span class="id">TASK</span><b>Task Queue</b><span>bring/return sequence, pause/resume</span></div>
@@ -107,27 +134,45 @@
         <div class="signal-row"><span class="id">PKG</span><b>Package boundary</b><span>task, command, perception, manipulation이 ROS topic/service로 연결됩니다.</span><span class="state">ROS</span></div>
         <div class="signal-row"><span class="id">TOPICS</span><b>Typed contracts</b><span>/task_request, /task_control, /human_grasped_tool, /sam_yaw, /tool_drop_detected</span><span class="state">ROS</span></div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Development Flow</div>
-      <h2>개발 순서는 기능을 나열하는 방식이 아니라 시연 루프를 닫는 방식으로 진행됐습니다</h2>
+      <h2>MILESTONE</h2>
+      <div class="slide-body">
       <div class="timeline milestone-rail">
-        <div class="timebox"><div class="phase">05.04</div><h3>Pipeline Skeleton</h3><p>ROS 2 package boundary, command/task coordinator, GUI skeleton</p></div>
-        <div class="timebox"><div class="phase">05.06</div><h3>Pick & Handover</h3><p>공구 꺼내기와 사용자 전달 최소 루프</p></div>
-        <div class="timebox"><div class="phase">05.13</div><h3>Retrieve Tool</h3><p>반납 intent와 사용자 회수 흐름</p></div>
-        <div class="timebox"><div class="phase">05.20</div><h3>Store in Drawer</h3><p>서랍 열기, 보관 sequence 통합</p></div>
-        <div class="timebox"><div class="phase">06.05 / 06.12</div><h3>Advanced & Safety</h3><p>mask, PCA, yaw, collision, recovery 안정화</p></div>
+        <div class="timebox"><div class="phase">05.04</div><h3>Pipeline Skeleton</h3><p>Pick and Place, Topic Command</p></div>
+        <div class="timebox"><div class="phase">05.06</div><h3>Pick & Handover</h3><p>GUI Prototype, Pick and Handover to User</p></div>
+        <div class="timebox"><div class="phase">05.13</div><h3>Retrieve Tool</h3><p>Return Tool From User, Place Temporary Space</p></div>
+        <div class="timebox"><div class="phase">05.20</div><h3>Store in Drawer</h3><p>Open Close Drawer, Place Tool in Drawer</p></div>
+        <div class="timebox"><div class="phase">06.05 / 06.12</div><h3>Advanced & Safety</h3><p>Enhanced PCA, SAM, YOLO, Safety, Recovery, Exception Handling</p></div>
       </div>
-      <div class="source-note">발표 포인트: 먼저 최소 루프를 만들고, 이후 인식 정확도와 안전성을 단계적으로 올렸습니다.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Team / Role</div>
+      <h2>협업 기반 업무 분장</h2>
+      <div class="slide-body">
+      <div class="team-role-grid">
+        <div class="team-role-card"><span class="id">PERCEPTION</span><b>김성윤</b><p>Tool Grasp Method</p></div>
+        <div class="team-role-card"><span class="id">COMMAND / GUI</span><b>김지호</b><p>LLM Based Operator Interface</p></div>
+        <div class="team-role-card"><span class="id">MANIPULATION</span><b>도건호</b><p>Drawer Flow / Simulation / QA</p></div>
+        <div class="team-role-card"><span class="id">PERCEPTION</span><b>이건우</b><p>Model Training</p></div>
+        <div class="team-role-card"><span class="id">PM / PERCEPTION</span><b>이민형</b><p>Integration / Grasp Gesture Detection</p></div>
+        <div class="team-role-card"><span class="id">MANIPULATION</span><b>정채현</b><p>MoveIt / Safety</p></div>
+      </div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 02</div>
-        <h1 class="divider-title">HOW</h1>
-        <p class="divider-caption">Command, Task Coordination, Perception, Manipulation, Safety 구현</p>
+        <div class="divider-code">SECTION 03</div>
+        <h1 class="divider-title">COMMAND</h1>
+        <p class="divider-caption">자연어 요청을 안정적인 robot task intent로 변환</p>
       </div>
     </section>
 
@@ -135,6 +180,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Command / Pipeline</div>
       <h2>자연어 명령을 Task로 바꾸는 Command Pipeline</h2>
+      <div class="slide-body">
       <div class="decision-panel">
         <div class="proof-panel">
           <span class="id">INTERFACE ENTRY</span>
@@ -149,12 +195,14 @@
           <div class="signal-row"><span class="id">04</span><b>Command</b><span>ToolCommand 또는 RobotTaskControl typed message로 publish</span><span class="state">TASK</span></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Command / Prompt Engineering</div>
       <h2>Schema와 Context 기반 LLM Parser</h2>
+      <div class="slide-body">
       <div class="proof-rig prompt-rig">
         <div class="table">
           <div class="row head"><div>사용자 표현</div><div>정규화 결과</div><div>처리 의도</div></div>
@@ -170,12 +218,14 @@
           <div class="signal-row"><span class="id">GUARD</span><b>fallback과 혼선 방지</b><span>rule parser 보조, unsupported drill 제거</span><span class="state">SAFE</span></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Operator GUI</div>
       <h2>로봇 상태 확인과 수동 제어를 통합한 Operator GUI</h2>
+      <div class="slide-body">
       <div class="proof-rig operator-gui-rig">
         <div class="placeholder image-fill"><img src="assets/operator-gui-command-interface.png" alt="MacGyvBot operator GUI screenshot" /></div>
         <div class="signal-stack operator-gui-stack">
@@ -185,12 +235,22 @@
           <div class="signal-row"><span class="id">GRIP</span><b>Gripper Control</b><span>안전 상태에서만 slider와 숫자 입력으로 RG2 gripper 폭 제어</span><span class="state">SAFE</span></div>
         </div>
       </div>
+      </div>
+    </section>
+
+    <section class="slide divider">
+      <div class="divider-inner">
+        <div class="divider-code">SECTION 04</div>
+        <h1 class="divider-title">TASK COORDINATION</h1>
+        <p class="divider-caption">bring과 return을 queue 상태로 쪼개고 중단, 재개, 복구를 관리</p>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Task Coordination / Task Queue</div>
       <h2>Task Coordination은 bring과 return을 TaskStep queue로 쪼개 실행합니다</h2>
+      <div class="slide-body">
       <div class="proof-rig">
         <div class="signal-stack pipeline-stack">
           <div class="signal-row"><span class="id">01</span><b>Request</b><span>command intent를 bring 또는 return task로 변환</span><span class="state">IN</span></div>
@@ -206,12 +266,14 @@
           <div class="proof-metric"><strong>QUEUE</strong><span>single source of task state</span></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Task Coordination / Pause Resume</div>
       <h2>Pause / Resume은 단순 cancel이 아니라 중단된 step을 다시 실행하는 문제였습니다</h2>
+      <div class="slide-body">
       <div class="table">
         <div class="row head"><div>상황</div><div>문제</div><div>해결 방향</div></div>
         <div class="row"><div>drawer preparation 중 pause</div><div>MoveIt goal cancel 후 현재 step 유실 위험</div><div>retry 가능한 suspended step으로 queue 앞에 보존</div></div>
@@ -219,11 +281,12 @@
         <div class="row"><div>반복 pause/resume</div><div>yaw/J6/grasp 상태가 어긋남</div><div>grasp-time J6 angle 보존과 status cleanup</div></div>
       </div>
       <div class="source-note">발표 포인트: pause/resume은 버튼 기능이 아니라 motion, drawer, recovery 상태를 함께 보존하는 문제였습니다.</div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 03</div>
+        <div class="divider-code">SECTION 05</div>
         <h1 class="divider-title">PERCEPTION</h1>
         <p class="divider-caption">공구 감지, mask 생성, handoff gate, PCA grasp 판단</p>
       </div>
@@ -233,6 +296,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Tool Detection</div>
       <h2>YOLO fine-tuning으로 공구 후보를 먼저 안정적으로 찾습니다</h2>
+      <div class="slide-body">
       <div class="proof-rig">
         <div class="placeholder"><div><b>이미지 교체 영역</b><span>YOLO fine-tuning 결과: RGB frame + bbox + class confidence</span></div></div>
         <div class="proof-panel">
@@ -242,58 +306,85 @@
           <div class="proof-metric"><strong>YOLO</strong><span>custom tool dataset + fine-tuning</span></div>
         </div>
       </div>
-    </section>
-
-    <section class="slide">
-      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
-      <div class="kicker">Perception / Mask Generation</div>
-      <h2>SAM+Depth mask는 handoff와 grasp point 계산이 공유하는 공구 표면입니다</h2>
-      <div class="flow" style="--cols: 4;">
-        <div class="flow-step"><b>YOLO bbox</b><span>SAM prompt 후보</span></div>
-        <div class="flow-step"><b>SAM mask</b><span>tool pixel 영역</span></div>
-        <div class="flow-step"><b>Depth band</b><span>같은 표면 깊이 유지</span></div>
-        <div class="flow-step hot"><b>Mask lock</b><span>handoff/PCA 공통 입력</span></div>
       </div>
-      <div class="placeholder" style="margin-top: 30px; min-height: 210px;"><div><b>이미지 교체 영역</b><span>SAM mask overlay, depth band visualization, locked mask debug image</span></div></div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Handoff / Initial</div>
-      <h2>초기 구현은 손과 공구가 가까우면 잡았다고 판단하는 rule-based 방식이었습니다</h2>
+      <h2>사용자 공구 전달 초기 구현</h2>
+      <div class="slide-body">
       <div class="flow" style="--cols: 4;">
         <div class="flow-step"><b>Hand landmark</b><span>손 위치와 주요 관절 좌표</span></div>
         <div class="flow-step"><b>Tool bbox</b><span>YOLO가 찾은 공구 영역</span></div>
         <div class="flow-step"><b>Distance / overlap</b><span>손과 공구의 근접도 계산</span></div>
         <div class="flow-step hot"><b>Rule threshold</b><span>grasp 여부 판단</span></div>
       </div>
-      <div class="source-note">발표 포인트: 처음에는 단순한 기하 조건으로 handoff release gate를 만들 수 있다고 봤습니다.</div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Handoff / Limitation</div>
-      <h2>하지만 가까움은 실제 grasp가 아니었고, release 판단에는 위험했습니다</h2>
-      <div class="table">
-        <div class="row head"><div>관찰</div><div>왜 문제가 됐나</div><div>결과</div></div>
-        <div class="row"><div>손이 스쳐 지나감</div><div>거리 기준은 접촉 의도를 구분하지 못함</div><div>false release 위험</div></div>
-        <div class="row"><div>손바닥을 편 상태</div><div>open hand도 bbox와 가까우면 threshold를 넘음</div><div>grasp 오인식</div></div>
-        <div class="row"><div>그리퍼/손 occlusion</div><div>YOLO bbox와 depth가 흔들림</div><div>handoff gate 불안정</div></div>
+      <h2>BBOX rule-based 공구 전달 초기 구현의 한계</h2>
+      <div class="slide-body">
+      <div class="failure-media-grid">
+        <figure class="failure-shot">
+          <img src="assets/perception/handoff/rule_base_failed.gif?v=loop" alt="rule-based grasp detection failure example" />
+          <figcaption><b>Rule-based grasp detection 실패</b><span>손과 공구가 가깝지 않더라도 임계값을 넘는 경우 false release 위험이 생긴다.</span></figcaption>
+        </figure>
+        <figure class="failure-shot">
+          <img src="assets/perception/handoff/yolo_detection_failed.gif?v=loop" alt="YOLO detection failure during handoff example" />
+          <figcaption><b>YOLO bbox 기반 판단 실패</b><span>손으로 공구를 가리는 경우 yolo 감지 실패</span></figcaption>
+        </figure>
+      </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
+      <div class="kicker">Perception / Mask Generation</div>
+      <h2>SAM+Depth mask</h2>
+      <div class="slide-body">
+      <div class="mask-proof-layout">
+        <div class="vertical-flow">
+          <div class="flow-step"><b>YOLO bbox ROI</b><span>bbox를 clamp하고 crop 기준으로 사용</span></div>
+          <div class="flow-step"><b>SAM foreground</b><span>bbox 안에서 물체처럼 보이는 mask 생성</span></div>
+          <div class="flow-step"><b>Foreground depth</b><span>mask 안 가까운 depth cluster 선택</span></div>
+          <div class="flow-step hot"><b>Refine + morphology</b><span>depth tolerance로 남기고 구멍 보정</span></div>
+        </div>
+        <figure class="wide-media-shot compact">
+          <img src="assets/perception/handoff/sam_depth_mask.gif?v=loop" alt="SAM and depth mask generation result" />
+          <figcaption><b>SAM+Depth mask generation</b><span>SAM이 bbox 안 foreground를 따고, 가까운 전경 depth와 맞는 픽셀만 남깁니다.</span></figcaption>
+        </figure>
+      </div>
       </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Handoff / Final</div>
-      <h2>그래서 손 랜드마크 지도학습 모델과 mask contact를 함께 쓰는 gate로 발전시켰습니다</h2>
-      <div class="decision-panel">
+      <h2>최종 사용자 공구 전달</h2>
+      <div class="slide-body">
+      <div class="decision-panel handoff-final-layout">
         <div class="proof-panel">
           <span class="id">RELEASE GATE</span>
-          <h3>hand landmark ML classifier + temporal stability + mask contact</h3>
-          <p>손 landmark를 feature로 만든 지도학습 기반 ML 모델이 open/grasp gesture를 먼저 판단합니다. 그 결과가 일정 시간 유지되고, SAM+Depth mask 표면 접촉까지 확인될 때만 handoff release를 허용합니다.</p>
+          <h3>hand landmark ML classifier + SAM depth mask contact</h3>
+          <p>rule-based proximity 대신 손 landmark 지도학습 모델로 grasp/open을 먼저 판단합니다. 여기에 SAM+Depth mask로 잡힌 공구 표면과의 contact, 시간 안정성을 함께 확인해 release gate를 닫습니다.</p>
           <div class="proof-metric"><strong>ML</strong><span>hand landmarks → grasp / open classification</span></div>
+          <div class="proof-metric"><strong>MASK</strong><span>SAM+Depth locked tool surface → contact evidence</span></div>
         </div>
-        <div class="placeholder"><div><b>이미지 교체 영역</b><span>handoff annotated image: landmarks, ML grasp result, mask contact</span></div></div>
+        <div class="handoff-grasp-media">
+          <figure class="grasp-shot compact">
+            <img src="assets/perception/handoff/driver_sam_depth_mask_grasp.gif?v=loop" alt="driver SAM depth mask grasp recognition result" />
+            <figcaption><b>Driver mask grasp recognition</b><span>mask 표면에서 depth mask와 손의 depth를 비교하여 ML 결과가 grasp여도 그리퍼를 열지 않습니다.</span></figcaption>
+          </figure>
+          <figure class="grasp-shot compact">
+            <img src="assets/perception/handoff/wrench_sam_depth_mask_grasp.gif?v=loop" alt="wrench SAM depth mask grasp recognition result" />
+            <figcaption><b>Wrench mask grasp recognition</b><span>공구 형상이 달라도 같은 mask 기반 판단을 적용합니다.</span></figcaption>
+          </figure>
+        </div>
+      </div>
       </div>
     </section>
 
@@ -301,6 +392,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / PCA Grasp</div>
       <h2>PCA는 mask의 주축으로 yaw와 gripper width를 계산합니다</h2>
+      <div class="slide-body">
       <div class="proof-rig">
         <div class="placeholder"><div><b>이미지 교체 영역</b><span>PCA axis overlay, yaw angle, width estimate debug result</span></div></div>
         <div class="signal-stack">
@@ -309,12 +401,14 @@
           <div class="callout-line"><span class="label">RESULT</span><p>mask 주축으로 yaw를 얻고, tool width를 gripper width 설정에 연결합니다.</p></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Lessons</div>
       <h2>Perception은 탐지, mask, handoff, grasp를 하나의 evidence chain으로 묶었습니다</h2>
+      <div class="slide-body">
       <div class="table">
         <div class="row head"><div>판단</div><div>초기 한계</div><div>최종 설계</div></div>
         <div class="row"><div>공구 감지</div><div>bbox 중심만으로는 파지 자세 부족</div><div>YOLO fine-tuning + depth projection</div></div>
@@ -322,11 +416,12 @@
         <div class="row"><div>grasp point</div><div>VLM 지연과 좌표 흔들림</div><div>SAM/depth mask + PCA yaw/width</div></div>
       </div>
       <div class="source-note">발표 포인트: Perception의 핵심은 공구 검출 결과를 실제 로봇 제어 파라미터로 바꾸는 것입니다.</div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 04</div>
+        <div class="divider-code">SECTION 06</div>
         <h1 class="divider-title">MANIPULATION</h1>
         <p class="divider-caption">공구를 꺼내고 전달하고 다시 서랍에 보관하는 실행 계층</p>
       </div>
@@ -336,6 +431,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Manipulation / Bring Tool</div>
       <h2>공구 요청에서는 drawer open, pick, handoff pose까지 motion sequence를 구성합니다</h2>
+      <div class="slide-body">
       <div class="flow" style="--cols: 5;">
         <div class="flow-step"><b>Drawer handle</b><span>handle pose 접근</span></div>
         <div class="flow-step"><b>Pull open</b><span>drawer open motion</span></div>
@@ -343,13 +439,14 @@
         <div class="flow-step"><b>Handoff pose</b><span>사용자 위치로 이동</span></div>
         <div class="flow-step hot"><b>Release</b><span>perception gate 통과</span></div>
       </div>
-      <div class="source-note">발표 포인트: Manipulation은 perception 결과를 motion target, yaw, gripper width로 실행합니다.</div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Manipulation / Store Tool In Drawer</div>
       <h2>공구 반납은 drawer ownership을 다시 얻고 안전 높이에서 보관하는 문제입니다</h2>
+      <div class="slide-body">
       <div class="decision-panel">
         <div class="proof-panel">
           <span class="id">STORE FLOW</span>
@@ -363,11 +460,12 @@
           <div class="callout-line"><span class="label">MOTION</span><p>MoveIt target, RG2 width, hand-eye transform, marker reference</p></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 05</div>
+        <div class="divider-code">SECTION 07</div>
         <h1 class="divider-title">SAFETY</h1>
         <p class="divider-caption">collision scene, tool drop detection, recovery flow</p>
       </div>
@@ -377,6 +475,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Safety / Drawer Collision Scene</div>
       <h2>Drawer collision scene은 실제 로봇 동작에서 planning 가능성과 안전성을 동시에 좌우했습니다</h2>
+      <div class="slide-body">
       <div class="proof-rig">
         <div class="system-map" style="--cols: 3;">
           <div class="system-node"><span class="id">SCENE</span><b>drawer_only</b><span>MoveIt planning scene에 drawer keep-out collision object 추가</span></div>
@@ -390,12 +489,14 @@
           <div class="proof-metric"><strong>PLAN</strong><span>safe but not over-constrained</span></div>
         </div>
       </div>
+      </div>
     </section>
 
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Safety / Drop Detection Recovery</div>
       <h2>공구를 떨어뜨렸을 때는 queue를 보존하고 recovery flow로 전환합니다</h2>
+      <div class="slide-body">
       <div class="flow" style="--cols: 5;">
         <div class="flow-step"><b>Drop event</b><span>/tool_drop_detected</span></div>
         <div class="flow-step"><b>Cancel motion</b><span>현재 MoveIt goal cancel</span></div>
@@ -404,12 +505,13 @@
         <div class="flow-step hot"><b>Resume</b><span>중단 step 재실행</span></div>
       </div>
       <div class="source-note">발표 포인트: drop recovery는 새 알고리즘이 아니라 기존 perception, grasp, drawer flow를 안전하게 재호출하는 구조입니다.</div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 06</div>
-        <h1 class="divider-title">SIM</h1>
+        <div class="divider-code">SECTION 08</div>
+        <h1 class="divider-title">SIMULATION</h1>
         <p class="divider-caption">실제 로봇 투입 전 sequence와 collision risk를 검증하는 환경</p>
       </div>
     </section>
@@ -418,6 +520,7 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Isaac Sim Simulation</div>
       <h2>Isaac Sim은 개선 방향이 아니라 실제 로봇 투입 전 검증 체계입니다</h2>
+      <div class="slide-body">
       <div class="split">
         <ul class="clean-list">
           <li>drawer open/close sequence와 collision scene 검증</li>
@@ -427,11 +530,12 @@
         </ul>
         <div class="placeholder"><div><b>이미지 교체 영역</b><span>Isaac Sim drawer scene, robot reachability, collision visualization</span></div></div>
       </div>
+      </div>
     </section>
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 07</div>
+        <div class="divider-code">SECTION 09</div>
         <h1 class="divider-title">IMPACT</h1>
         <p class="divider-caption">작업 효율, 안전성, 스마트팩토리 공구 관리 자동화 가능성</p>
       </div>
@@ -441,11 +545,13 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Project Impact</div>
       <h2>MacGyvBot의 임팩트는 공구 이동을 로봇 task로 바꾸는 데 있습니다</h2>
+      <div class="slide-body">
       <div class="metrics">
         <div class="metric"><div class="value">EFF</div><div class="label">작업자가 공구를 찾고 이동하는 시간을 줄임</div></div>
         <div class="metric"><div class="value">SAFE</div><div class="label">handoff gate, collision scene, drop recovery로 위험 동작을 줄임</div></div>
         <div class="metric"><div class="value">AUTO</div><div class="label">공구 요청/반납/보관을 자동화 가능한 workflow로 모델링</div></div>
         <div class="metric"><div class="value">LOG</div><div class="label">task status와 GUI feedback으로 실패 원인을 설명 가능하게 함</div></div>
+      </div>
       </div>
     </section>
 
@@ -453,12 +559,14 @@
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Next Improvements</div>
       <h2>개선 방향은 perception 안정화와 reactive planning으로 이어집니다</h2>
+      <div class="slide-body">
       <div class="table">
         <div class="row head"><div>개선 방향</div><div>현재 한계</div><div>다음 접근</div></div>
         <div class="row"><div>perception 고도화</div><div>조명, occlusion, low confidence bbox</div><div>mask 품질 평가와 multi-view/temporal filter</div></div>
         <div class="row"><div>grasp point 안정화</div><div>서랍 벽, depth edge, yaw/J6 제한</div><div>PCA confidence와 reachable grasp 후보 ranking</div></div>
         <div class="row"><div>환경 변화 대응</div><div>서랍/공구 위치 변화, marker occlusion</div><div>drawer state cache와 simulation 기반 검증 확대</div></div>
         <div class="row"><div>reactive planning</div><div>정적 plan 후 runtime 변화에 취약</div><div>collision-aware replanning과 operator confirmation</div></div>
+      </div>
       </div>
     </section>
 
