@@ -1,4 +1,4 @@
-@import url("./common.css?v=20260615-flow-fix-2");
+@import url("./common.css?v=20260615-vertical-caret-up");
 
 /* Deck viewport and slide frame */
 html, body { margin: 0; min-height: 100%; background: #111; color: var(--ink); font-family: var(--sans); }
@@ -32,6 +32,28 @@ body { overflow: hidden; }
   transform-origin: center;
 }
 .slide.active { display: block; }
+
+.slide.active:has(> .slide-body):not(.cover):not(.divider) {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.slide-body {
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+}
+
+.slide-body > :first-child {
+  margin-top: 0 !important;
+}
+
+.slide-body > .source-note {
+  align-self: end;
+}
+
 .slide.cover {
   background:
     linear-gradient(90deg, rgba(255,216,100,.08) 1px, transparent 1px),
