@@ -1123,6 +1123,121 @@ ul.clean-list li::before {
   margin-top: 28px;
 }
 
+.pca-yaw-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+  gap: 24px;
+  align-items: stretch;
+  margin-top: 24px;
+}
+
+.pca-visual-board {
+  display: grid;
+  gap: 12px;
+}
+
+.pca-tool-switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pca-tool-switch button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: #28313a;
+  padding: 9px 14px;
+  font: 800 13px/1 var(--sans);
+  cursor: pointer;
+}
+
+.pca-tool-switch button.active {
+  background: #111417;
+  border-color: #22282d;
+  color: #fff;
+}
+
+.pca-image-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.pca-shot {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(20,24,28,.08);
+}
+
+.pca-shot img {
+  display: block;
+  width: 100%;
+  height: 236px;
+  object-fit: contain;
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.06) 1px, transparent 1px),
+    #12171b;
+  background-size: 24px 24px;
+}
+
+.pca-shot figcaption {
+  min-height: 84px;
+  padding: 12px 15px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 7px;
+}
+
+.pca-shot figcaption b {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.pca-shot figcaption span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.pca-process-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pca-process-strip > div {
+  min-height: 72px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(90deg, rgba(111,232,255,.055) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(111,232,255,.045) 1px, transparent 1px),
+    #11161a;
+  background-size: 24px 24px;
+  color: #fff;
+  padding: 13px 14px;
+  display: grid;
+  gap: 5px;
+}
+
+.pca-process-strip b {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.pca-process-strip span {
+  color: rgba(245,248,245,.68);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .vertical-flow {
   display: grid;
   gap: 13px;
