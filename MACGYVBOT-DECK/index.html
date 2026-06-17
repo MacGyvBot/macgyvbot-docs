@@ -583,7 +583,7 @@
           <div class="flow-step"><b>Marker center</b><span>서랍 기준 ArUco marker 중심 좌표 인식</span></div>
           <div class="flow-step"><b>Slot offset</b><span>marker center에서 tool slot center까지의 offset 관리</span></div>
           <div class="flow-step"><b>Place target</b><span>tool center가 slot center에 오도록 목표 pose 계산</span></div>
-          <div class="flow-step hot"><b>Store tool</b><span>safe z, RG2 release, drawer close 순서로 보관</span></div>
+          <div class="flow-step"><b>Store tool</b><span>safe z, RG2 release, drawer close 순서로 보관</span></div>
         </div>
         <figure class="wide-media-shot compact aruco-c2c-shot">
           <img src="assets/perception/aruco_c2c.gif?v=loop" alt="ArUco marker center-to-center placement visualization" />
@@ -677,7 +677,7 @@
           <div class="flow-step"><b>Cancel motion</b><span>현재 MoveIt goal cancel</span></div>
           <div class="flow-step"><b>Keep queue</b><span>suspended step 보존</span></div>
           <div class="flow-step"><b>Recover grasp</b><span>YOLO/depth/PCA 재사용</span></div>
-          <div class="flow-step hot"><b>Resume</b><span>중단 step 재실행</span></div>
+          <div class="flow-step"><b>Resume</b><span>중단 step 재실행</span></div>
         </div>
         <figure class="wide-media-shot compact drop-detection-shot">
           <img src="assets/safety/drop_detection.gif?v=loop" alt="Tool drop detection demonstration" />
@@ -725,7 +725,7 @@
       <div class="impact-combined">
         <div class="metrics impact-metrics">
           <div class="metric"><div class="value">MOVE</div><div class="label">작업자가 보관 장소까지 이동하지 않아도 필요한 공구를 받을 수 있음</div></div>
-          <div class="metric"><div class="value">FIND</div><div class="label">서랍 탐색과 공구 선택을 perception 기반 robot task로 전환</div></div>
+          <div class="metric"><div class="value">FIND</div><div class="label">공구 선택을 perception 기반 robot task로 전환</div></div>
           <div class="metric"><div class="value">RETURN</div><div class="label">사용 후 공구 회수와 제자리 보관까지 하나의 closed loop로 처리</div></div>
           <div class="metric"><div class="value">FLOW</div><div class="label">반복적인 공구 이동은 로봇이 담당하고 작업자는 본 작업에 집중</div></div>
         </div>
