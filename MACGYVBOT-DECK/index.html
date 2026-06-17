@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MacGyvBot Troubleshooting Deck</title>
-  <link rel="stylesheet" href="styles/deck.css?v=20260617-operator-contain" />
+  <link rel="stylesheet" href="styles/deck.css?v=20260617-handoff-arrows-1px" />
 </head>
 <body>
   <main class="deck" id="deck">
@@ -49,19 +49,16 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Problem / Persona</div>
-      <h2>작업 페르소나: Hands-Busy Operator</h2>
+      <h2>페르소나: 작업 위치를 떠나기 어려운 현장 작업자</h2>
       <div class="slide-body">
       <div class="persona-layout">
-        <div class="proof-panel persona-card">
-          <span class="id">PRIMARY USER</span>
-          <h3>작업 위치를 떠나기 어려운 현장 작업자</h3>
-          <p>작업자는 장비나 조립물을 잡고 있어 공구 보관 장소까지 직접 이동하기 어렵습니다. MacGyvBot은 고정형 팔이 아니라 이동 가능한 로봇이라는 가정에서, 서랍 보관 장소와 작업자 위치 사이를 연결합니다.</p>
-          <div class="proof-metric"><strong>MOBILE ASSIST</strong><span>보관 장소의 공구를 작업 위치까지 운반</span></div>
-        </div>
+        <figure class="placeholder image-fill operator-gui-shot persona-worker-shot">
+          <img src="assets/tool_missing_worker.png?v=persona-worker" alt="공구를 찾기 어려운 작업자 상황" />
+        </figure>
         <div class="persona-stack">
           <div class="persona-step"><span class="id">CONTEXT</span><b>보관 장소와 작업 위치 분리</b><p>공구 서랍은 정리된 보관 장소에 있고, 작업자는 다른 위치에서 장비를 다룹니다.</p></div>
           <div class="persona-step"><span class="id">MOMENT</span><b>작업 중 공구 교체</b><p>렌치, 드라이버처럼 필요한 공구가 바뀔 때 작업자는 위치를 이탈하지 않고 요청합니다.</p></div>
-          <div class="persona-step"><span class="id">EXPECTATION</span><b>가져오고, 전달하고, 다시 보관</b><p>로봇은 서랍에서 공구를 꺼내 작업자에게 이동하고, 사용 후 다시 보관 장소로 돌려놓습니다.</p></div>
+          <div class="persona-step"><span class="id">EXPECTATION</span><b>가져오고, 전달하고, 다시 보관</b><p>로봇은 서랍에서 공구를 꺼내 작업자에게 전달하고, 사용 후 다시 보관 장소로 돌려놓습니다.</p></div>
         </div>
       </div>
       </div>
@@ -75,7 +72,7 @@
       <div class="problem-grid">
         <div class="problem-card"><span class="id">01</span><b>이동 비용</b><p>작업자가 보관 장소까지 직접 이동하면 작업 흐름이 끊깁니다.</p></div>
         <div class="problem-card"><span class="id">02</span><b>공구 탐색</b><p>서랍을 열고 필요한 공구를 찾는 과정이 본 작업과 분리된 반복 업무가 됩니다.</p></div>
-        <div class="problem-card"><span class="id">03</span><b>반납 누락</b><p>사용 후 제자리에 돌아가지 않은 공구는 다음 작업과 재고 관리 문제로 이어집니다.</p></div>
+        <div class="problem-card"><span class="id">03</span><b>반납 누락</b><p>사용 후 제자리에 정리되지 않은 공구는 다음 작업과 재고 관리 문제로 이어집니다.</p></div>
         <div class="problem-card hot"><span class="id">GOAL</span><b>MacGyvBot's GOAL</b><p>이동 로봇이 보관 서랍에서 공구를 꺼내 작업자에게 가져다주고, 사용 후 다시 보관합니다.</p></div>
       </div>
       </div>
@@ -98,17 +95,17 @@
         <div class="flow-lane">
           <div class="lane-label"><span>BRING</span><b>보관 장소 → 작업자</b></div>
           <div class="lane-steps">
-            <div class="lane-step"><b>요청 이해</b><span>공구명과 작업 intent 파악</span></div>
+            <div class="lane-step"><b>요청 이해</b><span>공구명과 작업 의도 파악</span></div>
             <div class="lane-step"><b>서랍 접근</b><span>해당 공구 보관 위치로 이동</span></div>
             <div class="lane-step"><b>공구 꺼내기</b><span>detect, mask, grasp 후 pick</span></div>
-            <div class="lane-step hot"><b>작업자 전달</b><span>작업 위치로 이동해 handoff</span></div>
+            <div class="lane-step hot"><b>작업자 전달</b><span>작업 위치로 이동해 전달</span></div>
           </div>
         </div>
         <div class="flow-lane">
           <div class="lane-label"><span>RETURN</span><b>작업자 → <br>보관 장소</b></div>
           <div class="lane-steps">
-            <div class="lane-step"><b>공구 회수</b><span>작업자 handoff로 공구 전달받기</span></div>
-            <div class="lane-step"><b>공구 확인</b><span>현재 tool context 또는 재탐지</span></div>
+            <div class="lane-step"><b>공구 회수</b><span>작업자가 로봇에게 공구 전달</span></div>
+            <div class="lane-step"><b>공구 확인</b><span>현재 공구 맥락 파악 또는 재탐지</span></div>
             <div class="lane-step"><b>서랍 복귀</b><span>공구 보관 위치로 이동</span></div>
             <div class="lane-step hot"><b>서랍 보관</b><span>open, place, release, close</span></div>
           </div>
@@ -252,15 +249,15 @@
       <div class="slide-body">
       <div class="proof-rig">
         <div class="signal-stack pipeline-stack">
-          <div class="signal-row"><span class="id">01</span><b>Split workflow</b><span>탐지, 서랍 접근, 파지, handoff, 복귀를 작은 작업 단위로 분리</span><span class="state">STEP</span></div>
-          <div class="signal-row"><span class="id">02</span><b>Build queue</b><span>bring 또는 return intent에 맞춰 TaskStep queue 구성</span><span class="state">PLAN</span></div>
+          <div class="signal-row"><span class="id">01</span><b>Split workflow</b><span>탐지, 서랍 접근, 파지, 전달, 복귀를 작은 작업 단위로 분리</span><span class="state">STEP</span></div>
+          <div class="signal-row"><span class="id">02</span><b>Build queue</b><span>가져와 또는 정리해 의도에 맞춰 TaskStep queue 구성</span><span class="state">PLAN</span></div>
           <div class="signal-row"><span class="id">03</span><b>Run step</b><span>task_coordinator_node가 queue에서 하나씩 꺼내 perception/motion 호출</span><span class="state">EXEC</span></div>
-          <div class="signal-row"><span class="id">04</span><b>Control</b><span>/task_control의 pause, resume, cancel 요청을 실행 흐름에 반영</span><span class="state">CTRL</span></div>
-          <div class="signal-row"><span class="id">05</span><b>Recover</b><span>현재 step과 남은 queue를 보존하고 drop recovery 후 원래 흐름으로 복귀</span><span class="state">SAFE</span></div>
+          <div class="signal-row"><span class="id">04</span><b>Control</b><span>/task_control의 정지, 재개, 취소 요청을 실행 흐름에 반영</span><span class="state">CTRL</span></div>
+          <div class="signal-row"><span class="id">05</span><b>Recovery</b><span>현재 단계와 남은 작업을 보존하고 drop 복구 후 원래 흐름으로 복귀</span><span class="state">SAFE</span></div>
         </div>
         <div class="proof-panel">
           <span class="id">QUEUE ROLE</span>
-          <h3>긴 흐름을 직접 막는 절차 대신 재개 가능한 작업 상태로 관리</h3>
+          <h3>긴 흐름을 직접 막는 절차 대신 <br> 재개 가능한 작업 상태로 관리</h3>
           <p>공구 전달과 반납을 한 번 시작하면 끝까지 가야 하는 스크립트로 두지 않고, 중지, 재개, 취소, 복구가 가능한 로봇 작업 흐름으로 관리합니다.</p>
           <div class="proof-metric"><strong>TaskStep</strong><span>single source of task progress</span></div>
         </div>
@@ -276,7 +273,7 @@
       <div class="table">
         <div class="row head"><div>구분</div><div>적합한 범위</div><div>MacGyvBot에서 필요한 제어</div></div>
         <div class="row"><div>ROS2 Action</div><div>하나의 goal 실행, feedback, cancel</div><div>단일 motion이나 독립 동작에는 적합하지만 전체 bring/return 상태를 보존하기 어렵습니다.</div></div>
-        <div class="row"><div>Bring / Return</div><div>탐지, 서랍 조작, 파지, handoff, 복귀, 예외 복구가 연결된 workflow</div><div>현재 step, 남은 queue, perception 결과, recovery state를 함께 관리해야 합니다.</div></div>
+        <div class="row"><div>Bring / Return</div><div>탐지, 서랍 조작, 파지, 전달, 복귀, 예외 복구가 연결된 작업 흐름</div><div>현재 step, 남은 queue, perception 결과, recovery state를 함께 관리해야 합니다.</div></div>
         <div class="row"><div>Task coordinator</div><div>TaskStep 단위의 중앙 실행 관리자</div><div>pause/resume/cancel, 동적 step 추가, drop recovery 이후 원래 작업 복귀를 일관되게 처리합니다.</div></div>
       </div>
       </div>
@@ -285,7 +282,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Task Coordination / Pause Resume</div>
-      <h2>queue 상태 처리</h2>
+      <h2>TaskStep Queue 상태 처리</h2>
       <div class="slide-body">
       <div class="table">
         <div class="row head"><div>이벤트</div><div>처리 방식</div><div>보존되는 상태</div></div>
@@ -318,9 +315,9 @@
           <div class="proof-metric"><strong>T<sub>base←cam</sub></strong><span>p<sub>base</sub> = T<sub>base←cam</sub> · K<sup>-1</sup>[u, v, 1]d</span></div>
         </div>
         <div class="signal-stack">
-          <div class="callout-line"><span class="label">PROCEDURE</span><p>Calibration_Tutorial의 data_recording.py로 고정 checkerboard를 로봇 자세별로 촬영하고, 각 이미지와 현재 gripper pose를 함께 저장했습니다.</p></div>
-          <div class="callout-line"><span class="label">SOLVE</span><p>handeye_calibration.py에서 체커보드 코너 검출, solvePnP, cv2.calibrateHandEye를 실행해 gripper → camera 변환을 계산했습니다.</p></div>
-          <div class="callout-line"><span class="label">OUTPUT</span><p>결과는 T_gripper2camera.npy로 저장하고, 실행 시 base → gripper · gripper → camera 조합으로 camera 좌표를 base 좌표로 변환했습니다.</p></div>
+          <div class="callout-line"><span class="label">PROCEDURE</span><p>고정 checkerboard를 로봇 자세별로 촬영하고, 각 이미지와 현재 gripper pose를 함께 저장했습니다.</p></div>
+          <div class="callout-line"><span class="label">SOLVE</span><p>체커보드 코너 검출, solvePnP, cv2.calibrateHandEye를 실행해 <br> gripper → camera 변환을 계산했습니다.</p></div>
+          <div class="callout-line"><span class="label">OUTPUT</span><p>결과는 4x4 변환 행렬로 저장하고, 실행 시 <br> base → gripper @ gripper → camera 조합으로 camera 좌표를 base 좌표로 변환했습니다.</p></div>
         </div>
       </div>
       </div>
@@ -354,16 +351,16 @@
         <div class="proof-panel yolo-success-panel">
           <span class="id">SUCCESS CRITERIA</span>
           <h3>후속 grasp pipeline에 사용할 수 있는 bbox인지로 평가했습니다</h3>
-          <p>class가 맞고, bbox가 공구 본체를 충분히 포함하며, SAM / depth mask / PCA yaw 계산으로 이어질 수 있으면 성공으로 기록했습니다.</p>
+          <p>class가 맞고, bbox가 공구 본체를 충분히 포함하며, <br> SAM / depth mask / PCA yaw 계산으로 이어질 수 있으면 성공으로 기록했습니다.</p>
           <div class="proof-metric"><strong>87 / 100</strong><span>5개 조건 전체 자체 측정 성공 횟수</span></div>
         </div>
         <div class="table yolo-success-table">
           <div class="row head"><div>측정 조건</div><div>성공</div><div>비고</div></div>
-          <div class="row"><div>일반 작업 환경</div><div>20 / 20</div><div>기본 작업대 조건에서 안정적으로 탐지</div></div>
-          <div class="row"><div>서랍 내부</div><div>18 / 20</div><div>플라이어가 ArUco marker 등과 함께 인식되어 구분이 어려운 경우 발생</div></div>
-          <div class="row"><div>서랍 내부 각도 변경</div><div>19 / 20</div><div>위와 동일한 원인으로 일부 오탐 또는 bbox 흔들림 발생</div></div>
-          <div class="row"><div>그리퍼 파지 순간</div><div>11 / 20</div><div>공구와 가까워져 공구 일부가 가려지는 상황. 드라이버는 비교적 안정적이나 랜치와 플라이어 인식률 저하</div></div>
-          <div class="row"><div>일반 작업 환경 동일 클래스 타 공구</div><div>20 / 20</div><div>open dataset 기반 학습으로 같은 class의 다른 공구에도 동작</div></div>
+          <div class="row success-bar" style="--rate: 100%; --bar-color: var(--green-2);"><div>일반 작업 환경</div><div>20 / 20</div><div>기본 작업대 조건에서 안정적으로 탐지</div></div>
+          <div class="row success-bar" style="--rate: 90%; --bar-color: var(--green-2);"><div>서랍 내부</div><div>18 / 20</div><div>플라이어가 ArUco marker 등과 함께 인식되어 구분이 어려운 경우 발생</div></div>
+          <div class="row success-bar" style="--rate: 95%; --bar-color: var(--green-2);"><div>서랍 내부 각도 변경</div><div>19 / 20</div><div>위와 동일한 원인으로 일부 오탐 또는 bbox 흔들림 발생</div></div>
+          <div class="row success-bar warn" style="--rate: 55%; --bar-color: var(--yellow);"><div>그리퍼 파지 순간</div><div>11 / 20</div><div>공구와 가까워져 공구 일부가 가려지는 상황. <br> 드라이버는 비교적 안정적이나 랜치와 플라이어 인식률 저하</div></div>
+          <div class="row success-bar" style="--rate: 100%; --bar-color: var(--green-2);"><div>일반 작업 환경 동일 클래스 타 공구</div><div>20 / 20</div><div>open dataset 기반 학습으로 같은 class의 다른 공구에도 동작</div></div>
         </div>
       </div>
       </div>
