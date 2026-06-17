@@ -1678,6 +1678,44 @@ ul.clean-list li::before {
 .row:not(.head) > div:nth-child(1) { font-weight: 800; }
 .row:not(.head) > div { color: #404850; }
 
+.task-comparison-table .row {
+  grid-template-columns: .85fr 1.35fr 1.55fr;
+}
+
+.task-comparison-table .row > div {
+  padding: 15px 18px;
+  font-size: 16px;
+}
+
+.task-comparison-table .row.head > div:nth-child(2),
+.task-comparison-table .row.head > div:nth-child(3) {
+  text-align: center;
+}
+
+.task-control-table .row {
+  grid-template-columns: .72fr 1.52fr 1.22fr .68fr;
+}
+
+.task-control-table .row > div {
+  padding: 14px 15px;
+  font-size: 15px;
+  line-height: 1.36;
+}
+
+.task-control-table .row > div:last-child {
+  text-align: center;
+  font-weight: 800;
+}
+
+.demo-divider {
+  justify-items: center;
+  text-align: center;
+}
+
+.demo-divider .divider-title {
+  font-size: clamp(74px, 8vw, 118px);
+}
+
 .yolo-success-layout {
   display: grid;
   grid-template-columns: minmax(0, .38fr) minmax(0, .62fr);
