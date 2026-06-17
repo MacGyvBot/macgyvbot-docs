@@ -240,7 +240,7 @@
     <section class="slide divider">
       <div class="divider-inner">
         <div class="divider-code">SECTION 03</div>
-        <h1 class="divider-title">IMPLEMENT : TASK</h1>
+        <h1 class="divider-title">IMPLEMENT : <br>TASK Coordinator</h1></h1>
         <p class="divider-caption">Task coordinator와 TaskStep Queue</p>
       </div>
     </section>
@@ -365,7 +365,7 @@
           <div class="row success-bar" style="--rate: 90%; --bar-color: var(--green-2);"><div>서랍 내부</div><div>18 / 20</div><div>플라이어가 ArUco marker 등과 함께 인식되어 구분이 어려운 경우 발생</div></div>
           <div class="row success-bar" style="--rate: 95%; --bar-color: var(--green-2);"><div>서랍 내부 각도 변경</div><div>19 / 20</div><div>위와 동일한 원인으로 일부 오탐 또는 bbox 흔들림 발생</div></div>
           <div class="row success-bar warn" style="--rate: 55%; --bar-color: var(--yellow);"><div>그리퍼 파지 순간</div><div>11 / 20</div><div>공구와 가까워져 공구 일부가 가려지는 상황. <br> 드라이버는 비교적 안정적이나 랜치와 플라이어 인식률 저하</div></div>
-          <div class="row success-bar" style="--rate: 100%; --bar-color: var(--green-2);"><div>일반 작업 환경 동일 클래스 타 공구</div><div>20 / 20</div><div>open dataset 기반 학습으로 같은 class의 다른 공구에도 동작</div></div>
+          <div class="row success-bar" style="--rate: 100%; --bar-color: var(--green-2);"><div>동일 클래스 타 공구</div><div>20 / 20</div><div>open dataset 기반 학습으로 같은 class의 다른 공구에도 동작</div></div>
         </div>
       </div>
       </div>
@@ -381,7 +381,7 @@
           <div class="flow-step"><b>Tool bbox</b><span>YOLO가 찾은 공구 영역</span></div>
           <div class="flow-step"><b>Hand landmark</b><span>손 위치와 주요 관절 좌표</span></div>
           <div class="flow-step"><b>Distance / overlap</b><span>손과 공구의 근접도 계산</span></div>
-          <div class="flow-step hot"><b>Rule threshold</b><span>grasp 여부 판단</span></div>
+          <div class="flow-step"><b>Rule threshold</b><span>grasp 여부 판단</span></div>
         </div>
         <div class="failure-media-grid handoff-failure-compact">
           <figure class="failure-shot">
@@ -467,7 +467,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Perception / Grasp Method / Decision</div>
-      <h2>Task-specific YOLO | SAM+Depth Mask | PCA</h2>
+      <h2>Final Method</h2>
       <div class="slide-body">
       <div class="decision-panel">
         <div class="proof-panel">
@@ -745,11 +745,11 @@
       <div class="slide-body">
       <div class="table future-work-table">
         <div class="row head"><div>구분</div><div>현재 한계</div><div>발전 방향</div></div>
-        <div class="row"><div>서랍 환경</div><div>서랍 위치와 손잡이 위치가 고정되어 있어 환경 변경 시 재설정이 필요</div><div>서랍과 손잡이를 인식해 open/close target을 동적으로 생성</div></div>
-        <div class="row"><div>공구 배치</div><div>서랍과 공구 위치가 1:1로 매핑되어 있어 다른 칸에 놓이면 대응이 어려움</div><div>서랍 내부를 인식하고 공구 위치를 실시간으로 갱신하는 inventory map 구성</div></div>
-        <div class="row"><div>공구 인식</div><div>grasp point가 YOLO 학습 class와 bbox 품질에 의존해 새 공구 투입 시 재학습 필요</div><div>open-vocabulary detection과 VLM affordance 판단으로 새 공구 일반화</div></div>
-        <div class="row"><div>Task planning</div><div>현재는 구현된 sequence 중심으로 동작해 상태 변화에 따른 자율 선택이 제한적</div><div>LLM이 사용 가능한 interface와 상태/이미지 해석 결과를 보고 필요한 움직임 수행</div></div>
-        <div class="row"><div>정교한 조작</div><div>서랍에 잘 넣고, 잘 잡고, 안정적으로 빼는 판단은 규칙 기반으로 한계가 있음</div><div>VLM과 결합해 넣기/잡기/빼기 affordance를 평가하고 재시도 전략 생성</div></div>
+        <div class="row"><div>유동적 서랍 환경</div><div>서랍 위치와 손잡이 위치가 고정되어 있어 환경 변경 시 재설정이 필요</div><div>서랍과 손잡이를 인식해 open/close target을 동적으로 생성</div></div>
+        <div class="row"><div>다양한 공구 배치</div><div>서랍과 공구 위치가 1:1로 매핑되어 있어 다른 칸에 놓이면 대응이 어려움</div><div>서랍 내부를 인식하고 공구 위치를 실시간으로 갱신하는 inventory map 구성</div></div>
+        <div class="row"><div>다양한 공구 인식</div><div>grasp point가 YOLO 학습 class와 bbox 품질에 의존해 새 공구 투입 시 재학습 필요</div><div>open-vocabulary detection과 VLM affordance 판단으로 새 공구 일반화</div></div>
+        <div class="row"><div>유동적 Task planning</div><div>현재는 구현된 sequence 중심으로 동작해 상태 변화에 따른 자율 선택이 제한적</div><div>LLM이 사용 가능한 interface와 상태/이미지 해석 결과를 보고 필요한 움직임 수행</div></div>
+        <div class="row"><div>정교한 잡는 자세 조작</div><div>서랍에 잘 넣고, 잘 잡고, 안정적으로 빼는 판단은 규칙 기반으로 한계가 있음</div><div>VLM과 결합해 넣기/잡기/빼기 affordance를 평가하고 재시도 전략 생성</div></div>
       </div>
       </div>
     </section>
