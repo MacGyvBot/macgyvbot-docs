@@ -29,7 +29,7 @@
           <h2>문제 정의에서 설계, 구현, 검증 순서로 설명합니다</h2>
         </div>
         <div class="arc-grid intro-stack toc-stack" style="grid-template-columns: 1fr; gap: 10px;">
-          <div class="flow-step hot"><b>1. MacGyvBot이 해결하고자 하는 문제</b><span>공구 요청과 반납 흐름</span></div>
+          <div class="flow-step"><b>1. MacGyvBot이 해결하고자 하는 문제</b><span>공구 요청과 반납 흐름</span></div>
           <div class="flow-step"><b>2. 시스템 디자인</b><span>ROS 2 task architecture</span></div>
           <div class="flow-step"><b>3. 구현</b><span>Command, Task, Perception, Manipulation</span></div>
           <div class="flow-step"><b>4. Safety / Simulation</b><span>recovery와 Isaac Sim 검증</span></div>
@@ -123,11 +123,11 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">System Design / Architecture</div>
-      <h2>Command-to-Task 기반 ROS 2 계층형 아키텍처</h2>
+      <h2>Service 아키텍처</h2>
       <div class="slide-body">
       <div class="system-map compact" style="--cols: 5; margin-top: 24px;">
         <div class="system-node"><span class="id">CMD</span><b>Command</b><span>LLM/parser, STT/TTS, GUI command</span></div>
-        <div class="system-node"><span class="id">TASK</span><b>Coordinator</b><span>bring/return flow, pause/resume</span></div>
+        <div class="system-node"><span class="id">TASK</span><b>Task Coordinator</b><span>bring/return sequence, pause/resume</span></div>
         <div class="system-node"><span class="id">VISION</span><b>Perception</b><span>YOLO, mask, handoff, PCA grasp</span></div>
         <div class="system-node"><span class="id">MOTION</span><b>Manipulation</b><span>MoveIt, RG2, drawer motion</span></div>
         <div class="system-node"><span class="id">SAFE</span><b>Safety</b><span>collision scene, drop recovery</span></div>
@@ -142,12 +142,12 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Development Flow</div>
-      <h2>MILESTONE</h2>
+      <h2>Project Development Process</h2>
       <div class="slide-body">
       <div class="timeline milestone-rail">
-        <div class="timebox"><div class="phase">05.04</div><h3>Pipeline Skeleton</h3><p>Pick and Place, Topic Command</p></div>
+        <div class="timebox"><div class="phase">05.04</div><h3>Base Pipeline</h3><p>Pick and Place, Topic Command</p></div>
         <div class="timebox"><div class="phase">05.06</div><h3>Pick & Handover</h3><p>GUI Prototype, Pick and Handover to User</p></div>
-        <div class="timebox"><div class="phase">05.13</div><h3>Retrieve Tool</h3><p>Return Tool From User, Place Temporary Space</p></div>
+        <div class="timebox"><div class="phase">05.13</div><h3>Return Tool</h3><p>Return Tool From User, Place Temporary Space</p></div>
         <div class="timebox"><div class="phase">05.20</div><h3>Store in Drawer</h3><p>Open Close Drawer, Place Tool in Drawer</p></div>
         <div class="timebox"><div class="phase">06.05 / 06.12</div><h3>Advanced <br> & Safety</h3><p>Enhanced PCA, SAM, YOLO, Safety, Recovery, Exception Handling</p></div>
       </div>
@@ -157,7 +157,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Team / Role</div>
-      <h2>협업 기반 업무 분장</h2>
+      <h2>팀원별 담당 영역</h2>
       <div class="slide-body">
       <div class="team-role-grid">
         <div class="team-role-card"><span class="id">PERCEPTION</span><b>김성윤</b><p>Tool Grasp Method</p></div>
@@ -274,7 +274,7 @@
     <section class="slide">
       <div class="topbar"><span class="brand-mini"><img src="assets/macgyvbot.png" alt="" />MacGyvBot</span><span class="page-no"></span></div>
       <div class="kicker">Task Coordination / Design Choice</div>
-      <h2>ROS2 Action VS TaskStep Queue</h2>
+      <h2>ROS2 Action vs. TaskStep Queue</h2>
       <div class="slide-body">
       <div class="table">
         <div class="row head"><div>구분</div><div>적합한 범위</div><div>MacGyvBot에서 필요한 제어</div></div>
@@ -408,7 +408,7 @@
           <div class="flow-step"><b>YOLO bbox ROI</b><span>bbox를 clamp하고 crop 기준으로 사용</span></div>
           <div class="flow-step"><b>SAM foreground</b><span>bbox 안에서 물체처럼 보이는 mask 생성</span></div>
           <div class="flow-step"><b>Foreground depth</b><span>mask 안 가까운 depth cluster 선택</span></div>
-          <div class="flow-step hot"><b>Refine + morphology</b><span>depth tolerance로 남기고 구멍 보정</span></div>
+          <div class="flow-step"><b>Refine + morphology</b><span>depth tolerance로 남기고 구멍 보정</span></div>
         </div>
         <figure class="wide-media-shot compact">
           <img src="assets/perception/handoff/sam_depth_mask.gif?v=loop" alt="SAM and depth mask generation result" />
@@ -568,7 +568,7 @@
         <div class="problem-card"><span class="id">ASSUMPTION</span><b>서랍 위치 고정</b><p>현실의 공구 서랍은 작업장 안에서 자주 이동하지 않으므로, 기준 좌표를 고정값으로 관리할 수 있습니다.</p></div>
         <div class="problem-card"><span class="id">CONFIG</span><b>좌표 하드코딩</b><p>서랍 handle, safe z, approach depth를 설정값으로 두어 반복 가능한 open, pick, place sequence를 구성했습니다.</p></div>
         <div class="problem-card"><span class="id">BENEFIT</span><b>반복성 확보</b><p>매번 drawer pose를 새로 추정하지 않아도 같은 서랍에서 안정적인 motion target을 재사용할 수 있습니다.</p></div>
-        <div class="problem-card hot"><span class="id">LIMIT</span><b>변경 시 보정 필요</b><p>서랍 위치가 바뀌는 환경에서는 고정 좌표만으로 부족하므로 marker 기반 기준점이 필요합니다.</p></div>
+        <div class="problem-card"><span class="id">LIMIT</span><b>변경 시 보정 필요</b><p>서랍 위치가 바뀌는 환경에서는 고정 좌표만으로 부족하므로 marker 기반 기준점이 필요합니다.</p></div>
       </div>
       </div>
     </section>
