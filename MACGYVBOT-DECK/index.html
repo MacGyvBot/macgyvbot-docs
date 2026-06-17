@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MacGyvBot Troubleshooting Deck</title>
-  <link rel="stylesheet" href="styles/deck.css?v=20260617-operator-contain" />
+  <link rel="stylesheet" href="styles/deck.css?v=20260617-section-flow" />
 </head>
 <body>
   <main class="deck" id="deck">
@@ -72,11 +72,14 @@
       <div class="kicker">Problem / Why Robot</div>
       <h2>문제 정의: Tool Flow Interruption</h2>
       <div class="slide-body">
-      <div class="problem-grid">
+      <div class="problem-goal-flow">
+        <div class="problem-grid problem-grid-three">
         <div class="problem-card"><span class="id">01</span><b>이동 비용</b><p>작업자가 보관 장소까지 직접 이동하면 작업 흐름이 끊깁니다.</p></div>
         <div class="problem-card"><span class="id">02</span><b>공구 탐색</b><p>서랍을 열고 필요한 공구를 찾는 과정이 본 작업과 분리된 반복 업무가 됩니다.</p></div>
         <div class="problem-card"><span class="id">03</span><b>반납 누락</b><p>사용 후 제자리에 돌아가지 않은 공구는 다음 작업과 재고 관리 문제로 이어집니다.</p></div>
-        <div class="problem-card hot"><span class="id">GOAL</span><b>MacGyvBot's GOAL</b><p>이동 로봇이 보관 서랍에서 공구를 꺼내 작업자에게 가져다주고, 사용 후 다시 보관합니다.</p></div>
+        </div>
+        <div class="goal-arrow">↓</div>
+        <div class="problem-card hot problem-goal-card"><span class="id">GOAL</span><b>MacGyvBot's GOAL</b><p>이동 로봇이 보관 서랍에서 공구를 꺼내 작업자에게 가져다주고, 사용 후 다시 보관합니다.</p></div>
       </div>
       </div>
     </section>
@@ -124,14 +127,14 @@
       <div class="slide-body">
       <div class="system-map compact" style="--cols: 5; margin-top: 24px;">
         <div class="system-node"><span class="id">CMD</span><b>Command</b><span>LLM/parser, STT/TTS, GUI command</span></div>
-        <div class="system-node"><span class="id">TASK</span><b>Task Queue</b><span>bring/return sequence, pause/resume</span></div>
+        <div class="system-node"><span class="id">TASK</span><b>Coordinator</b><span>bring/return flow, pause/resume</span></div>
         <div class="system-node"><span class="id">VISION</span><b>Perception</b><span>YOLO, mask, handoff, PCA grasp</span></div>
         <div class="system-node"><span class="id">MOTION</span><b>Manipulation</b><span>MoveIt, RG2, drawer motion</span></div>
         <div class="system-node"><span class="id">SAFE</span><b>Safety</b><span>collision scene, drop recovery</span></div>
       </div>
       <div class="signal-stack compact rail" style="margin-top: 14px;">
-        <div class="signal-row"><span class="id">PKG</span><b>Package boundary</b><span>task, command, perception, manipulation이 ROS topic/service로 연결됩니다.</span><span class="state">ROS</span></div>
-        <div class="signal-row"><span class="id">TOPICS</span><b>Typed contracts</b><span>/task_request, /task_control, /human_grasped_tool, /sam_yaw, /tool_drop_detected</span><span class="state">ROS</span></div>
+        <div class="signal-row"><span class="id">ROLE</span><b>역할 분리</b><span>명령, 작업, 인식, 조작이 각자 맡은 일만 수행합니다.</span><span class="state">ROS</span></div>
+        <div class="signal-row"><span class="id">LINK</span><b>메시지 연결</b><span>패키지끼리는 직접 호출하지 않고 topic/service로 연결됩니다.</span><span class="state">API</span></div>
       </div>
       </div>
     </section>
@@ -170,7 +173,7 @@
     <section class="slide divider">
       <div class="divider-inner">
         <div class="divider-code">SECTION 03</div>
-        <h1 class="divider-title">COMMAND</h1>
+        <h1 class="divider-title">IMPLEMENT : COMMAND</h1>
         <p class="divider-caption">자연어 요청을 안정적인 robot task intent로 변환</p>
       </div>
     </section>
@@ -239,9 +242,9 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 04</div>
-        <h1 class="divider-title">TASK COORDINATION</h1>
-        <p class="divider-caption">TaskStep Queue</p>
+        <div class="divider-code">SECTION 03</div>
+        <h1 class="divider-title">IMPLEMENT : TASK</h1>
+        <p class="divider-caption">Task coordinator와 TaskStep Queue</p>
       </div>
     </section>
 
@@ -299,8 +302,8 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 05</div>
-        <h1 class="divider-title">PERCEPTION</h1>
+        <div class="divider-code">SECTION 03</div>
+        <h1 class="divider-title">IMPLEMENT : PERCEPTION</h1>
         <p class="divider-caption">Calibration, YOLO, Handoff, PCA</p>
       </div>
     </section>
@@ -535,8 +538,8 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 06</div>
-        <h1 class="divider-title">MANIPULATION</h1>
+        <div class="divider-code">SECTION 03</div>
+        <h1 class="divider-title">IMPLEMENT : MANIPULATION</h1>
         <p class="divider-caption">공구를 꺼내고 전달하고 다시 서랍에 보관하는 실행 계층</p>
       </div>
     </section>
@@ -613,7 +616,7 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 07</div>
+        <div class="divider-code">SECTION 04</div>
         <h1 class="divider-title">SAFETY</h1>
         <p class="divider-caption">collision scene, tool drop detection, recovery flow</p>
       </div>
@@ -686,7 +689,7 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 08</div>
+        <div class="divider-code">SECTION 04</div>
         <h1 class="divider-title">SIMULATION</h1>
         <p class="divider-caption">실제 로봇 투입 전 sequence와 collision risk를 검증하는 환경</p>
       </div>
@@ -708,7 +711,7 @@
 
     <section class="slide divider">
       <div class="divider-inner">
-        <div class="divider-code">SECTION 09</div>
+        <div class="divider-code">SECTION 05</div>
         <h1 class="divider-title">IMPACT</h1>
         <p class="divider-caption">작업자가 공구 때문에 흐름을 끊지 않도록 만드는 로봇 task layer</p>
       </div>

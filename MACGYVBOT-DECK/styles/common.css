@@ -263,6 +263,38 @@ h3 {
   gap: 16px;
 }
 
+.problem-goal-flow {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+}
+
+.problem-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.problem-goal-flow .problem-card {
+  min-height: 184px;
+}
+
+.goal-arrow {
+  justify-self: center;
+  width: 52px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: var(--green-2);
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.problem-goal-card {
+  justify-self: center;
+  width: min(560px, 100%);
+  min-height: 142px !important;
+}
+
 .problem-card {
   min-height: 250px;
   display: grid;
